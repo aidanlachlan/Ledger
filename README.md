@@ -4,6 +4,10 @@
 
 <p align="center">
   <img src="docs/screenshots/home.png" width="360" alt="Ledger's Home screen: $50.32 of food budget left this week, $99.68 of $150.00 spent, marked On track; 0 of 1 meals out; buttons to paste a receipt or add a purchase manually.">
+  <img src="docs/screenshots/purchase.png" width="360" alt="A saved receipt purchase: Whole Foods Market, $77.37, with its parsed items, prices, quantities and savings.">
+</p>
+<p align="center">
+  <img src="docs/screenshots/recent.png" width="360" alt="The recent purchases list: four purchases with store, amount, type and date.">
   <img src="docs/screenshots/history.png" width="360" alt="The weekly history chart: this week's spending bar at $99.68 against a dashed $150 budget line, with a table view below.">
 </p>
 
