@@ -21,10 +21,10 @@ If port 3000 is taken, run `npm run dev -- -p 3048` and set `APP_ORIGIN=http://l
 1. **Create a project and apply the migrations.** Apply every file in `supabase/migrations/` in filename order (`0001` through `0004`), using the SQL editor or your usual migration workflow. The app needs all of them. Never run the files in `supabase/tests/` against a real project; they are only for the isolated local test runner.
 2. **Enable email auth.** Under Authentication, enable the Email provider with both password sign-in and email links. Keep **Confirm email** on, so new password accounts confirm their address first. The app requires passwords of at least 8 characters; set Supabase's minimum to match or higher.
 3. **Keep the default email templates' `{{ .ConfirmationURL }}` links.** Email links use the PKCE flow: Supabase verifies the link and redirects to `/auth/callback` with a one-time code, which the app exchanges for a cookie session. The code only works in the browser that requested the link, because that browser holds the matching verifier cookie. Don't switch to a token-hash link flow, which would let anyone holding the link sign in.
-4. **Set up email delivery.** Supabase's built-in email allows only 2 emails an hour for the whole project, so connect your own SMTP service (such as Resend, with a domain you own) before inviting other users. Sign-in, sign-up and email-link requests run in the browser, so Supabase's per-IP Auth rate limits apply to each visitor separately. Turn on leaked-password protection under the Email provider settings.
+4. **Set up email delivery.** Supabase's built-in email allows only 2 emails an hour for the whole project, so connect your own SMTP service (such as Resend, with a domain you own) before inviting other users. Sign-in, sign-up and email-link requests run in the browser, so Supabase's per-IP Auth rate limits apply to each visitor separately. In the Email provider settings, turn on leaked-password protection and **Secure password change** (password changes then require a recent sign-in).
 5. **Set URLs.** Set the Auth **Site URL** to the production origin, for example `https://ledger.example.com`, and allowlist these exact redirect URLs:
-   - `http://localhost:3000/auth/callback`
-   - `https://YOUR-PRODUCTION-HOST/auth/callback`
+   - `http://localhost:3000/auth/callback` and `http://localhost:3000/auth/reset`
+   - `https://YOUR-PRODUCTION-HOST/auth/callback` and `https://YOUR-PRODUCTION-HOST/auth/reset`
    - any other local port or preview callback you actually use
 6. **Copy the keys.** Put the project URL and the public anon (or publishable) key into `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`, in `.env.local` and in Vercel. Never use a secret or service-role key; the app doesn't need one.
 
@@ -41,6 +41,7 @@ A database trigger creates each new user's profile and default budget ($150 a we
 ## Smoke test after deploying
 
 1. Create an account with a password, confirm the email, and sign in. Then request an email link and open it in the same browser.
+1. Use **Forgot your password?**, open the reset link in the same browser, and set a new password. Check that the old password no longer works and that another signed-in browser is signed out.
 2. Set budget and timezone in Settings, and add a manual purchase. Check that **Repeat last** fills today's date and doesn't save on its own.
 3. Paste the test receipt from [MVP-brief.md](MVP-brief.md), edit an item and the total, save, and check Home and History.
 4. Edit and then delete a purchase.

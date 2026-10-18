@@ -19,7 +19,7 @@
 - **Edit and delete** any saved purchase.
 - **Weekly history:** spending and meals out per week, each against the budget you had *that* week.
 - **Settings:** weekly budget, meals-out limit and timezone. Weeks run Monday to Sunday in your timezone.
-- **Sign in** with email and password, or a one-time email link.
+- **Sign in** with email and password, or a one-time email link. Forgot your password? A reset link takes you straight to choosing a new one, and changing your password signs out your other devices.
 
 ## Pasting a receipt
 

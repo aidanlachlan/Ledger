@@ -33,10 +33,19 @@ export async function setPassword(
       return { error: "That's already your password." };
     if (error?.code === "weak_password")
       return { error: "Choose a stronger password." };
+    if (error?.code === "reauthentication_needed")
+      return {
+        error:
+          "For your security, sign out and sign back in, then change your password.",
+      };
     if (error)
       return { error: "Your password could not be saved. Please retry." };
+    // Anyone signed in elsewhere with the old password loses access now.
+    const others = await supabase.auth.signOut({ scope: "others" });
     return {
-      success: "Password saved. You can now sign in with it on any device.",
+      success: others.error
+        ? "Password saved. Other devices could not be signed out; sign out on them yourself."
+        : "Password saved. Other devices have been signed out.",
     };
   } catch {
     return { error: "Your password could not be saved. Please retry." };

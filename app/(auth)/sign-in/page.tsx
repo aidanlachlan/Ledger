@@ -6,14 +6,14 @@ export default async function SignIn({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
-  // The callback comes from configuration, never from the request's Host.
-  let callbackUrl: string | null = null;
+  // Email links use the configured origin, never the request's Host.
+  let origin: string | null = null;
   if (
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   ) {
     try {
-      callbackUrl = `${await appOrigin()}/auth/callback`;
+      origin = await appOrigin();
     } catch {
       /* Missing APP_ORIGIN in production: show the unavailable notice. */
     }
@@ -37,8 +37,8 @@ export default async function SignIn({
             same browser.
           </p>
         )}
-        {callbackUrl ? (
-          <SignInForm callbackUrl={callbackUrl} />
+        {origin ? (
+          <SignInForm origin={origin} />
         ) : (
           <p className="notice">
             Sign-in is not available yet. Please try again after setup is
