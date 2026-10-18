@@ -1,6 +1,6 @@
 # Ledger
 
-**Know where your money goes, week by week.** Ledger is a personal finance tracker that starts with food, the spending that's easiest to lose track of. Today it tracks grocery spending against a weekly budget and keeps count of meals out. Log a purchase in a few taps, or paste the text of a receipt and review every item before it's saved. Next come more spending categories, income, recurring bills and reading bank statement text; see the [roadmap](#roadmap).
+**Know where your money goes, week by week.** Ledger is a personal finance tracker that starts with food, the spending that's easiest to lose track of. Today it tracks grocery spending against a weekly budget and counts meals out; more categories, income and bills are on the [roadmap](#roadmap).
 
 <p align="center">
   <img src="docs/screenshots/home.png" width="360" alt="Ledger's Home screen: $50.32 of food budget left this week, $99.68 of $150.00 spent, marked On track; 0 of 1 meals out; buttons to paste a receipt or add a purchase manually.">
@@ -13,42 +13,42 @@
 
 ## Features
 
-- **Weekly budget at a glance.** Home shows what's left of this week's grocery budget, a progress bar, whether you're on track for the day of the week, and meals out against your limit.
-- **Quick manual entry.** Amount, store, type and date, with store autocomplete and **Repeat last** for regular purchases. Items are optional.
-- **Paste a receipt.** Copy receipt text from a photo (iPhone Live Text or Google Lens) and paste it. Ledger pulls out the store, items, quantities, savings, tax and total, checks that the items add up, and lets you fix anything before saving.
-- **Edit and delete** any saved purchase, with its items.
-- **Weekly history.** Charts of spending and meals out per week, each compared with the budget you had *that* week, plus a weekly average and how many weeks you stayed within budget.
-- **Your settings.** Weekly budget, meals-out limit and timezone. Weeks run Monday to Sunday in your own timezone.
-- **Sign in your way.** Email and password, or a one-time email link.
+- **Weekly budget at a glance:** what's left, a progress bar, whether you're on track for the day of the week, and meals out against your limit.
+- **Quick manual entry** with store autocomplete and **Repeat last**. Items are optional.
+- **Paste a receipt** ([how](#pasting-a-receipt)): Ledger pulls out the store, items, quantities, savings, tax and total, checks that the items add up, and lets you fix anything before saving.
+- **Edit and delete** any saved purchase.
+- **Weekly history:** spending and meals out per week, each against the budget you had *that* week.
+- **Settings:** weekly budget, meals-out limit and timezone. Weeks run Monday to Sunday in your timezone.
+- **Sign in** with email and password, or a one-time email link.
 
 ## Pasting a receipt
 
-Ledger reads receipt *text*, so first copy the text from a photo of the receipt:
+Copy the receipt's text from a photo first:
 
-- **iPhone (Live Text):** open the photo in Photos, tap the Live Text button in the corner (or touch and hold the text), then tap **Select All** and **Copy**. You can also point the Camera at the receipt and tap the Live Text button.
+- **iPhone (Live Text):** open the photo in Photos, tap the Live Text button (or touch and hold the text), then **Select All** and **Copy**.
 - **Android (Google Lens):** open the photo in Google Photos, tap **Lens**, then **Text**, then **Select all** and **Copy text**.
 
-Then tap **Paste receipt** in Ledger, paste the text, and tap **Review receipt**. Check the store, items and totals, fix anything that was misread, and save. The photo and the raw text are never uploaded; only the values you review are saved.
+Then tap **Paste receipt** in Ledger, paste, and review before saving.
 
 ## Tech stack
 
 - [Next.js](https://nextjs.org) (App Router, Server Actions) with strict TypeScript
 - [Supabase](https://supabase.com): Postgres, Auth and row-level security
 - [Zod](https://zod.dev) for validation, [Tailwind CSS](https://tailwindcss.com) for styling
-- [Vitest](https://vitest.dev) for unit tests, plus a PostgreSQL test runner for the database
+- [Vitest](https://vitest.dev), plus a PostgreSQL test runner for the database
 - Deployed on [Vercel](https://vercel.com)
 
 No ORM, no separate API server, no analytics or tracking scripts.
 
 ## Engineering highlights
 
-- **Receipt text stays private.** The parser runs entirely in the browser. Raw receipt text is never sent to a server or stored, and lines that look like card numbers, payment details or phone numbers are dropped before anything else happens. Only the values you review are saved.
-- **Saves are safe to retry.** Each purchase and its items are saved in a single database transaction, and every form carries a request ID. If the connection drops and you press Save again, you get the original purchase back, not a duplicate, even when two saves arrive at the same moment.
-- **The database checks everything.** Postgres validates every purchase itself (types, money limits, dates, item counts) and computes the receipt math check, so a bad or hand-crafted request can't store invalid data, even one that skips the app.
-- **Users can only ever see their own data.** Postgres row-level security restricts every table to its owner. Items inherit ownership from their purchase, and budget history is read-only and written by a database trigger. The app uses only the public key; no service-role key exists in the code.
-- **Locked-down pages.** A strict Content Security Policy with a fresh nonce on every request (no inline scripts, no `eval`), no-store caching for personal pages, and auth redirects that never trust the request's Host header.
-- **Money is exact.** Amounts are handled as integer cents end to end, never floating-point dollars.
-- **Accessible.** Labelled form fields, visible keyboard focus, a skip link, and charts that can also be read as tables.
+- **Receipt text stays private.** Parsing runs in the browser. The raw text is never uploaded or stored, and lines that look like card numbers or phone numbers are dropped first. Only the values you review are saved.
+- **Saves are safe to retry.** A purchase and its items save in one transaction, keyed by a per-form request ID. Pressing Save again after a dropped connection returns the original purchase, never a duplicate, even when two saves arrive at once.
+- **The database checks everything.** Postgres validates every purchase itself and computes the receipt math check, so a hand-crafted request can't store invalid data.
+- **Users only ever see their own data.** Row-level security restricts every table to its owner. The app uses only the public key; there is no service-role key.
+- **Locked-down pages.** A strict Content Security Policy with a fresh nonce per request (no inline scripts, no `eval`), no-store caching, and auth redirects that never trust the request's Host header.
+- **Money is exact:** integer cents end to end, never floating-point dollars.
+- **Accessible:** labelled fields, visible keyboard focus, a skip link, and charts that can be read as tables.
 
 ## Running locally
 
@@ -61,7 +61,7 @@ cp .env.example .env.local   # add your Supabase URL and anon key
 npm run dev
 ```
 
-Full Supabase and Vercel setup, including the database migrations and auth settings, is in [docs/SETUP.md](docs/SETUP.md).
+Supabase and Vercel setup, including migrations and auth settings: [docs/SETUP.md](docs/SETUP.md).
 
 ## Testing
 
@@ -72,17 +72,17 @@ npm test          # unit tests: receipt parser, validation, weeks, history
 npm run test:db   # database tests (needs local PostgreSQL: initdb, pg_ctl, psql)
 ```
 
-The database runner starts a throwaway PostgreSQL cluster, applies the real migrations, and tests two-user isolation, validation, rollback, concurrent duplicate saves, editing, deleting and budget history. It then deletes the cluster. It never touches an existing database. See [docs/VERIFICATION.md](docs/VERIFICATION.md) for what has and hasn't been verified.
+The database tests run the real migrations on a throwaway PostgreSQL cluster, deleted afterwards, and cover two-user isolation, validation, rollback, concurrent duplicate saves, editing, deleting and budget history. What has and hasn't been verified: [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
 ## Roadmap
 
-Food is the first category. The plan is to grow Ledger into a full personal finance tracker:
+Growing Ledger into a full personal finance tracker:
 
-- Spending categories beyond food, with a budget for each
+- Spending categories beyond food, each with a budget
 - Income, and monthly as well as weekly budgets
 - Recurring bills and subscriptions
-- Reading transactions from cropped bank statement text, parsed in the browser like receipts, so the raw statement never leaves your device and only the transactions you review are saved
-- Reports and trends across categories over time
+- Bank statements read from cropped text in the browser, like receipts: the raw statement never leaves your device
+- Reports and trends across categories
 
 ## How it was built
 
