@@ -2,7 +2,10 @@
 
 **Know where your food money goes, week by week.** Ledger is a web app for tracking grocery spending against a weekly budget and keeping count of meals out. Log a purchase in a few taps, or paste the text of a receipt and review every item before it's saved.
 
-<!-- Screenshots: add the Home and receipt review screens here, e.g. docs/screenshots/home.png -->
+<p align="center">
+  <img src="docs/screenshots/home.png" width="360" alt="Ledger's Home screen: $50.32 of food budget left this week, $99.68 of $150.00 spent, marked On track; 0 of 1 meals out; buttons to paste a receipt or add a purchase manually.">
+  <img src="docs/screenshots/history.png" width="360" alt="The weekly history chart: this week's spending bar at $99.68 against a dashed $150 budget line, with a table view below.">
+</p>
 
 ## Features
 
