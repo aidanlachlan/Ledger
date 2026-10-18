@@ -1,6 +1,6 @@
 # Ledger
 
-**Know where your money goes, week by week.** Ledger is a personal finance tracker that starts with food, the spending that's easiest to lose track of. Today it tracks grocery spending against a weekly budget and keeps count of meals out. Log a purchase in a few taps, or paste the text of a receipt and review every item before it's saved. Next come more spending categories, income, recurring bills and bank imports; see the [roadmap](#roadmap).
+**Know where your money goes, week by week.** Ledger is a personal finance tracker that starts with food, the spending that's easiest to lose track of. Today it tracks grocery spending against a weekly budget and keeps count of meals out. Log a purchase in a few taps, or paste the text of a receipt and review every item before it's saved. Next come more spending categories, income, recurring bills and reading bank statement text; see the [roadmap](#roadmap).
 
 <p align="center">
   <img src="docs/screenshots/home.png" width="360" alt="Ledger's Home screen: $50.32 of food budget left this week, $99.68 of $150.00 spent, marked On track; 0 of 1 meals out; buttons to paste a receipt or add a purchase manually.">
@@ -72,7 +72,7 @@ Food is the first category. The plan is to grow Ledger into a full personal fina
 - Spending categories beyond food, with a budget for each
 - Income, and monthly as well as weekly budgets
 - Recurring bills and subscriptions
-- Importing transactions from bank statements
+- Reading transactions from cropped bank statement text, parsed in the browser like receipts, so bank data never leaves your device
 - Reports and trends across categories over time
 
 ## How it was built
