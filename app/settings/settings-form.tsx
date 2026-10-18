@@ -1,0 +1,112 @@
+"use client";
+import { useState, useTransition } from "react";
+import { saveSettings } from "../actions";
+import type { ActionResult } from "../../lib/validation";
+export default function SettingsForm({
+  budget,
+  meals,
+  timezone,
+}: {
+  budget: string;
+  meals: string;
+  timezone: string;
+}) {
+  const [state, setState] = useState<ActionResult>({});
+  const [pending, startTransition] = useTransition();
+  const action = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (pending) return;
+    const form = new FormData(event.currentTarget);
+    startTransition(async () => {
+      try {
+        setState(await saveSettings({}, form));
+      } catch {
+        setState({
+          error:
+            "The connection was interrupted. Your values are still here. Please retry.",
+        });
+      }
+    });
+  };
+  const [values, setValues] = useState({ budget, meals, timezone });
+  return (
+    <form onSubmit={action} className="stack">
+      <label>
+        Weekly grocery budget (USD)
+        <input
+          name="budget"
+          inputMode="decimal"
+          required
+          maxLength={20}
+          value={values.budget}
+          onChange={(e) =>
+            setValues((current) => ({ ...current, budget: e.target.value }))
+          }
+        />
+        <span className="helper">
+          Includes groceries and convenience purchases.
+        </span>
+      </label>
+      <label>
+        Weekly meals-out limit
+        <input
+          name="meals"
+          inputMode="numeric"
+          required
+          maxLength={3}
+          value={values.meals}
+          onChange={(e) =>
+            setValues((current) => ({ ...current, meals: e.target.value }))
+          }
+        />
+        <span className="helper">
+          Each eating-out purchase counts as one meal.
+        </span>
+      </label>
+      <label>
+        Timezone
+        <input
+          name="timezone"
+          list="timezones"
+          required
+          maxLength={100}
+          value={values.timezone}
+          onChange={(e) =>
+            setValues((current) => ({ ...current, timezone: e.target.value }))
+          }
+        />
+        <span className="helper">
+          Use an IANA timezone such as America/Los_Angeles.
+        </span>
+      </label>
+      <datalist id="timezones">
+        {[
+          "America/Los_Angeles",
+          "America/Denver",
+          "America/Chicago",
+          "America/New_York",
+          "Pacific/Honolulu",
+          "Europe/London",
+          "Europe/Paris",
+          "Asia/Tokyo",
+          "Australia/Sydney",
+        ].map((zone) => (
+          <option key={zone} value={zone} />
+        ))}
+      </datalist>
+      {state.error && (
+        <p role="alert" className="notice error">
+          {state.error}
+        </p>
+      )}
+      {state.success && (
+        <p role="status" className="notice success">
+          {state.success}
+        </p>
+      )}
+      <button className="primary" disabled={pending}>
+        {pending ? "Saving settings…" : "Save settings"}
+      </button>
+    </form>
+  );
+}
