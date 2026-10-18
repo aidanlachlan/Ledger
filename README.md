@@ -86,4 +86,4 @@ Growing Ledger into a full personal finance tracker:
 
 ## How it was built
 
-Built with [Claude Code](https://claude.com/claude-code). I set the requirements, reviewed the design, and audited and refactored the code. The original MVP brief is in [docs/Ledger-instructions.md](docs/Ledger-instructions.md).
+Built with [Claude Code](https://claude.com/claude-code). I set the requirements, reviewed the design, and audited and refactored the code. The original MVP brief is in [docs/MVP-brief.md](docs/MVP-brief.md).

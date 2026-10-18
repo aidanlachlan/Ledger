@@ -42,7 +42,7 @@ A database trigger creates each new user's profile and default budget ($150 a we
 
 1. Create an account with a password, confirm the email, and sign in. Then request an email link and open it in the same browser.
 2. Set budget and timezone in Settings, and add a manual purchase. Check that **Repeat last** fills today's date and doesn't save on its own.
-3. Paste the receipt fixture from [Ledger-instructions.md](Ledger-instructions.md), edit an item and the total, save, and check Home and History.
+3. Paste the test receipt from [MVP-brief.md](MVP-brief.md), edit an item and the total, save, and check Home and History.
 4. Edit and then delete a purchase.
 5. Interrupt a save (for example, go offline), keep your edits, and retry. Only one purchase should be saved.
 6. Sign out, sign in as a second user, and confirm you see none of the first user's settings, stores, purchases or items.
