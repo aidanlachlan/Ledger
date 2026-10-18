@@ -21,6 +21,15 @@
 - **Your settings.** Weekly budget, meals-out limit and timezone. Weeks run Monday to Sunday in your own timezone.
 - **Sign in your way.** Email and password, or a one-time email link.
 
+## Pasting a receipt
+
+Ledger reads receipt *text*, so first copy the text from a photo of the receipt:
+
+- **iPhone (Live Text):** open the photo in Photos, tap the Live Text button in the corner (or touch and hold the text), then tap **Select All** and **Copy**. You can also point the Camera at the receipt and tap the Live Text button.
+- **Android (Google Lens):** open the photo in Google Photos, tap **Lens**, then **Text**, then **Select all** and **Copy text**.
+
+Then tap **Paste receipt** in Ledger, paste the text, and tap **Review receipt**. Check the store, items and totals, fix anything that was misread, and save. The photo and the raw text are never uploaded; only the values you review are saved.
+
 ## Tech stack
 
 - [Next.js](https://nextjs.org) (App Router, Server Actions) with strict TypeScript
