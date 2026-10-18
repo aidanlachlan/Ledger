@@ -4,8 +4,6 @@
 
 Ledger is a multi-user web app for tracking food spending. Users log purchases by hand or paste receipt text copied using iPhone Live Text or Google Lens. This MVP has no AI and no image upload. Currency is USD only.
 
-Read this whole file before coding. Build the specified scope. Resolve routine implementation choices using the simplest solution that satisfies these requirements. Ask only when a material conflict or missing requirement blocks safe implementation. Do not add features or dependencies without a concrete need and authorization.
-
 ## MVP scope
 
 1. Email-link sign-up, sign-in, and sign-out using Supabase Auth.
