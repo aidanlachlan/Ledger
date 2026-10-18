@@ -1,90 +1,73 @@
 # Ledger
 
-A personal weekly food-spending tracker. Built with Next.js App Router, strict TypeScript, Tailwind CSS, Supabase Auth/Postgres/RLS, Zod, and Vitest. No AI, image upload, tracking scripts, service key, ORM, or separate application server.
+**Know where your food money goes, week by week.** Ledger is a web app for tracking grocery spending against a weekly budget and keeping count of meals out. Log a purchase in a few taps, or paste the text of a receipt and review every item before it's saved.
 
-## Run locally
+<!-- Screenshots: add the Home and receipt review screens here, e.g. docs/screenshots/home.png -->
 
-Use Node **24.x** (also in `.nvmrc`).
+## Features
+
+- **Weekly budget at a glance.** Home shows what's left of this week's grocery budget, a progress bar, whether you're on track for the day of the week, and meals out against your limit.
+- **Quick manual entry.** Amount, store, type and date, with store autocomplete and **Repeat last** for regular purchases. Items are optional.
+- **Paste a receipt.** Copy receipt text from a photo (iPhone Live Text or Google Lens) and paste it. Ledger pulls out the store, items, quantities, savings, tax and total, checks that the items add up, and lets you fix anything before saving.
+- **Edit and delete** any saved purchase, with its items.
+- **Weekly history.** Charts of spending and meals out per week, each compared with the budget you had *that* week, plus a weekly average and how many weeks you stayed within budget.
+- **Your settings.** Weekly budget, meals-out limit and timezone. Weeks run Monday to Sunday in your own timezone.
+- **Sign in your way.** Email and password, or a one-time email link.
+
+## Tech stack
+
+- [Next.js](https://nextjs.org) (App Router, Server Actions) with strict TypeScript
+- [Supabase](https://supabase.com): Postgres, Auth and row-level security
+- [Zod](https://zod.dev) for validation, [Tailwind CSS](https://tailwindcss.com) for styling
+- [Vitest](https://vitest.dev) for unit tests, plus a PostgreSQL test runner for the database
+- Deployed on [Vercel](https://vercel.com)
+
+No ORM, no separate API server, no analytics or tracking scripts.
+
+## Engineering highlights
+
+- **Receipt text stays private.** The parser runs entirely in the browser. Raw receipt text is never sent to a server or stored, and lines that look like card numbers, payment details or phone numbers are dropped before anything else happens. Only the values you review are saved.
+- **Saves are safe to retry.** Each purchase and its items are saved in a single database transaction, and every form carries a request ID. If the connection drops and you press Save again, you get the original purchase back, not a duplicate, even when two saves arrive at the same moment.
+- **The database checks everything.** Postgres validates every purchase itself (types, money limits, dates, item counts) and computes the receipt math check, so a bad or hand-crafted request can't store invalid data, even one that skips the app.
+- **Users can only ever see their own data.** Postgres row-level security restricts every table to its owner. Items inherit ownership from their purchase, and budget history is read-only and written by a database trigger. The app uses only the public key; no service-role key exists in the code.
+- **Locked-down pages.** A strict Content Security Policy with a fresh nonce on every request (no inline scripts, no `eval`), no-store caching for personal pages, and auth redirects that never trust the request's Host header.
+- **Money is exact.** Amounts are handled as integer cents end to end, never floating-point dollars.
+- **Accessible.** Labelled form fields, visible keyboard focus, a skip link, and charts that can also be read as tables.
+
+## Running locally
+
+Requires Node 24 and a Supabase project.
 
 ```sh
 nvm use
 npm ci
-cp .env.example .env.local
-# Fill in the two public Supabase values in .env.local.
+cp .env.example .env.local   # add your Supabase URL and anon key
 npm run dev
 ```
 
-Open http://localhost:3000. Without Supabase configuration, the sign-in page shows an unavailable message and protected pages redirect to sign-in. No mock purchases or fake authenticated session are used.
+Full Supabase and Vercel setup, including the database migrations and auth settings, is in [docs/SETUP.md](docs/SETUP.md).
 
-If port 3000 is occupied, use `npm run dev -- -p 3048` and set server-only `APP_ORIGIN=http://localhost:3048` in your untracked `.env.local`. Add that exact callback to Supabase's redirect allowlist. The application never derives authentication redirects from an untrusted request Host header.
-
-## Supabase setup
-
-1. Create a fresh Supabase project. Apply every file in `supabase/migrations/` in filename order (`0001` through `0004`) using the SQL editor or your usual migration workflow. The app needs all of them: edit, history and manual items break without the later files. Do **not** run files under `supabase/tests/` on that project; those files are exclusively for the isolated test runner.
-2. Under Authentication, enable the Email provider and email-link sign-in/sign-up. Account creation is enabled by the sign-in action. For this PKCE flow, retain the magic-link template's `{{ .ConfirmationURL }}` link; Supabase verifies the link and redirects to the app's callback with a code. The callback exchanges that code for a cookie session. Do not replace this with an unrelated token-hash callback flow.
-3. Configure SMTP/email delivery for real users. Confirm sender settings and Auth email rate limits. Open each link in the **same browser** that requested it so its PKCE verifier cookie is available.
-4. Set Auth **Site URL** to the final production origin, e.g. `https://ledger.example.com`. Allowlist these exact redirect URLs:
-   - `http://localhost:3000/auth/callback`
-   - `https://YOUR-PRODUCTION-HOST/auth/callback`
-   - Any explicitly chosen local port or preview callback you actually use.
-5. Copy the project HTTPS URL and public anonymous key into `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` in `.env.local` and Vercel. A public publishable key can also be supplied using the existing ANON_KEY variable name. Never use a secret/service key.
-6. The new-user trigger creates the profile and default weekly budget. This is a fresh-project migration; existing users from before migration application need profile/budget rows backfilled before using the app.
-
-## Vercel setup
-
-1. Put this project in your Git repository, commit the lockfile, and connect it to Vercel. Select the Next.js preset and Node 24.x. The build command is `npm run build`; Vercel handles Next.js output.
-2. Set the two public Supabase variables for Production. Set server-only `APP_ORIGIN=https://YOUR-PRODUCTION-HOST` to pin the callback origin explicitly. Without it, the app uses Vercel's production project URL (or deployment URL when no project URL exists). Never include a path in APP_ORIGIN.
-3. Use matching Supabase Site URL and callback allowlist entries. Redeploy after environment changes, because public variables are included at build time.
-4. Push to the connected production branch. After deployment, verify real email sign-in, settings, both purchase flows, retry behavior, and isolation using two separate browser profiles/accounts.
-
-Preview deployments require an explicit APP_ORIGIN for that preview and its exact allowlisted callback. Do not use the production callback for a sign-in started on another origin; its verifier cookie belongs to that other origin.
-
-## What is implemented
-
-- Email links, code exchange, cookie refresh through `proxy.ts`, verified server authorization, and POST sign-out.
-- Per-user weekly grocery/convenience budget, meals-out count limit, and saved IANA timezone.
-- Manual purchase entry with store autocomplete and Repeat last (today's date; no automatic save).
-- Deterministic receipt parsing with conservative column fallback and private-line filtering. Receipt text is parsed in browser memory and never sent to a parser service or persisted. Only reviewed values are saved.
-- Receipt review with editable store/date/type/note, totals, item names/quantities/unit prices/savings/line totals, add/remove items, and live math checks. Quantity edits do not silently change a paid line total.
-- Weekly Home totals, negative remaining amounts, Monday–Sunday local calendar boundaries, prorated status, meals-out comparison, and recent purchases.
-- Five-table RLS model (budget history is read-only, written by a trigger). Item ownership derives from the parent purchase; store autocomplete uses owned purchase names. Atomic invoker RPC with strict database validation, server-computed math, and concurrent retry protection.
-- Responsive single-column dark UI, accessible labels/focus/targets, keyboard operation, and a nonce-based production CSP with no script unsafe-inline or unsafe-eval. HTML is dynamic and no-store. Development alone adds unsafe-eval and local websocket connections for framework tooling. Inline styles are allowed as specified.
-
-The current budget applies immediately to the current week. There are no monthly or historical budgets. Each eating-out purchase counts as one meal, independently of its cost. Settings save timezone and budget sequentially; a partial failure is reported and values remain available for retry.
-
-## Verification
+## Testing
 
 ```sh
 npm run typecheck
 npm run lint
-npm test
-npm run build
-grep -rE 'service_role|sb_secret' .next/static
+npm test          # unit tests: receipt parser, validation, weeks, history
+npm run test:db   # database tests (needs local PostgreSQL: initdb, pg_ctl, psql)
 ```
 
-The grep command must print nothing; exit status **1** means no matches. It is not proof that every possible secret is absent.
+The database runner starts a throwaway PostgreSQL cluster, applies the real migrations, and tests two-user isolation, validation, rollback, concurrent duplicate saves, editing, deleting and budget history. It then deletes the cluster. It never touches an existing database. See [docs/VERIFICATION.md](docs/VERIFICATION.md) for what has and hasn't been verified.
 
-Database verification requires local `initdb`, `pg_ctl`, and `psql`:
+## Roadmap
 
-```sh
-npm run test:db
-```
+Ledger starts with food because it's the spending that's easiest to lose track of. The plan is to grow it into a full personal finance tracker:
 
-The runner creates a new temporary cluster using a private Unix socket, stubs Supabase's auth schema/roles and `auth.uid()`, applies the real migration, exercises two-user RLS, direct RPC validation, forced rollback, and concurrent same-request retries, then removes the cluster. It never uses an existing database or a service key. These tests validate PostgreSQL behavior, not hosted Supabase Auth/email delivery.
+- Spending categories beyond food, with a budget for each
+- Income, and monthly as well as weekly budgets
+- Recurring bills and subscriptions
+- Importing transactions from bank statements
+- Reports and trends across categories over time
 
-Observed checks during implementation: all four required commands passed under Node 24; **all unit tests passed**; the exact fixture produced 14 items totaling 7,531 cents and math `ok`; isolated database tests including concurrent retries passed; production browser smoke checked mobile layout, keyboard focus, CSP nonces, no-store headers, and unauthenticated redirects. See `VERIFICATION.md` for scope and remaining live checks.
+## How it was built
 
-Production dependency audit reported zero vulnerabilities. The full audit also reports development-only advisories in the current Next.js ESLint/glob dependency chain; the latest published braces/micromatch versions checked did not offer a patched compatible resolution. No forced framework/lint downgrade was applied. Review updates before exposing development tooling beyond localhost.
-
-## Remaining live acceptance checks
-
-No Supabase project credentials or Vercel connection were supplied, so no hosted migration, email delivery, authenticated browser flow, or deployment was performed. After setup:
-
-1. Request a link, open it in the same browser, set budget/timezone, and add a manual purchase.
-2. Use Repeat last; confirm today's date and no automatic save.
-3. Paste the exact fixture from `Ledger-instructions.md`; edit an item/total, save, and verify Home.
-4. Interrupt a save, retain all edits, and retry. Confirm only one purchase was saved.
-5. Sign out. Use a second account and verify separate settings, autocomplete, purchases, and items. Repeat ownership checks against the actual project's Data API.
-6. Check keyboard focus, small-screen layout, and the browser console for CSP errors in the deployed app.
-
-Out-of-scope features in the brief remain omitted, including AI/images, payments, bank imports, shopping lists, account deletion, and light theme. Saved purchases can be edited and deleted, and a History page charts past weeks against the budget of the time.
+Built with [Claude Code](https://claude.com/claude-code). I set the requirements, reviewed the design, and audited and refactored the code. The original MVP brief is in [docs/Ledger-instructions.md](docs/Ledger-instructions.md).

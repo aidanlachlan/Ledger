@@ -1,5 +1,7 @@
 # Ledger: instructions for coding agents
 
+> The original MVP brief, kept for reference. The app has since grown beyond it: password sign-in, editing and deleting purchases, and weekly history. See the [README](../README.md) for current features.
+
 Ledger is a multi-user web app for tracking food spending. Users log purchases by hand or paste receipt text copied using iPhone Live Text or Google Lens. This MVP has no AI and no image upload. Currency is USD only.
 
 Read this whole file before coding. Build the specified scope. Resolve routine implementation choices using the simplest solution that satisfies these requirements. Ask only when a material conflict or missing requirement blocks safe implementation. Do not add features or dependencies without a concrete need and authorization.
