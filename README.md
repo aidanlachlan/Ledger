@@ -86,4 +86,4 @@ Growing Ledger into a full personal finance tracker:
 
 ## How it was built
 
-Built with [Claude Code](https://claude.com/claude-code). I set the requirements, reviewed the design, and audited and refactored the code. The original MVP brief is in [docs/MVP-brief.md](docs/MVP-brief.md).
+The first version was built from my [MVP brief](docs/MVP-brief.md) using a custom ChatGPT-based coding harness. I then audited and refactored it with [Claude Code](https://claude.com/claude-code), and added editing, password sign-in and weekly history. I set the requirements, reviewed the design, and directed the audit and refactor.
