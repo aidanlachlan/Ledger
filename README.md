@@ -72,6 +72,8 @@ npm test          # unit tests: receipt parser, validation, weeks, history
 npm run test:db   # database tests (needs local PostgreSQL: initdb, pg_ctl, psql)
 ```
 
+Every push runs typecheck, lint, unit tests and a production build in GitHub Actions.
+
 The database tests run the real migrations on a throwaway PostgreSQL cluster, deleted afterwards, and cover two-user isolation, validation, rollback, concurrent duplicate saves, editing, deleting and budget history. What has and hasn't been verified: [docs/VERIFICATION.md](docs/VERIFICATION.md).
 
 ## Roadmap
