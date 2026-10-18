@@ -1,3 +1,4 @@
+import { appOrigin } from "../../../lib/auth";
 import SignInForm from "./sign-in-form";
 export default async function SignIn({
   searchParams,
@@ -5,10 +6,18 @@ export default async function SignIn({
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
-  const configured = Boolean(
+  // The callback comes from configuration, never from the request's Host.
+  let callbackUrl: string | null = null;
+  if (
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  );
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ) {
+    try {
+      callbackUrl = `${await appOrigin()}/auth/callback`;
+    } catch {
+      /* Missing APP_ORIGIN in production: show the unavailable notice. */
+    }
+  }
   return (
     <>
       <p className="eyebrow">A little clarity for your week</p>
@@ -28,8 +37,8 @@ export default async function SignIn({
             same browser.
           </p>
         )}
-        {configured ? (
-          <SignInForm />
+        {callbackUrl ? (
+          <SignInForm callbackUrl={callbackUrl} />
         ) : (
           <p className="notice">
             Sign-in is not available yet. Please try again after setup is

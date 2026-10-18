@@ -3,8 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { appOrigin, requireUser } from "../lib/auth";
-import { createClient } from "../lib/supabase/server";
+import { requireUser } from "../lib/auth";
 import {
   passwordInput,
   purchaseInput,
@@ -12,96 +11,6 @@ import {
   type ActionResult,
 } from "../lib/validation";
 import { todayIn } from "../lib/week";
-
-export async function signIn(
-  _previous: ActionResult,
-  form: FormData,
-): Promise<ActionResult> {
-  const parsed = z
-    .object({ email: z.email().max(254) })
-    .safeParse({ email: form.get("email") });
-  if (!parsed.success) return { error: "Enter a valid email address." };
-  try {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email: parsed.data.email,
-      options: {
-        emailRedirectTo: `${await appOrigin()}/auth/callback`,
-        shouldCreateUser: true,
-      },
-    });
-    if (error)
-      return {
-        error:
-          "The sign-in link could not be requested. Please try again shortly.",
-      };
-    return {
-      success:
-        "If email delivery is available, a sign-in link is on its way. Open it in this browser.",
-    };
-  } catch {
-    return { error: "Sign-in is unavailable. Please try again shortly." };
-  }
-}
-
-export async function signInWithPassword(
-  _previous: ActionResult,
-  form: FormData,
-): Promise<ActionResult> {
-  const parsed = z
-    .object({ email: z.email().max(254), password: z.string().min(1).max(72) })
-    .safeParse({ email: form.get("email"), password: form.get("password") });
-  if (!parsed.success) return { error: "Enter your email and password." };
-  try {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithPassword(parsed.data);
-    if (error?.code === "email_not_confirmed")
-      return {
-        error: "Confirm your email first using the link we sent, then sign in.",
-      };
-    if (error)
-      return {
-        error:
-          "That email and password don't match. If you haven't set a password yet, sign in with an email link.",
-      };
-  } catch {
-    return { error: "Sign-in is unavailable. Please try again shortly." };
-  }
-  redirect("/");
-}
-
-export async function signUp(
-  _previous: ActionResult,
-  form: FormData,
-): Promise<ActionResult> {
-  const parsed = z
-    .object({ email: z.email().max(254), password: passwordInput })
-    .safeParse({ email: form.get("email"), password: form.get("password") });
-  if (!parsed.success) return { error: parsed.error.issues[0].message };
-  let signedIn = false;
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase.auth.signUp({
-      ...parsed.data,
-      options: { emailRedirectTo: `${await appOrigin()}/auth/callback` },
-    });
-    if (error?.code === "weak_password")
-      return { error: "Choose a stronger password." };
-    if (error)
-      return {
-        error: "Your account could not be created. Please try again shortly.",
-      };
-    // With email confirmation off, Supabase signs the user in immediately.
-    signedIn = Boolean(data.session);
-  } catch {
-    return { error: "Sign-up is unavailable. Please try again shortly." };
-  }
-  if (signedIn) redirect("/");
-  return {
-    success:
-      "Check your email and open the confirmation link in this browser. After that, you can sign in with your password.",
-  };
-}
 
 export async function setPassword(
   _previous: ActionResult,
