@@ -72,7 +72,7 @@ Food is the first category. The plan is to grow Ledger into a full personal fina
 - Spending categories beyond food, with a budget for each
 - Income, and monthly as well as weekly budgets
 - Recurring bills and subscriptions
-- Reading transactions from cropped bank statement text, parsed in the browser like receipts, so bank data never leaves your device
+- Reading transactions from cropped bank statement text, parsed in the browser like receipts, so the raw statement never leaves your device and only the transactions you review are saved
 - Reports and trends across categories over time
 
 ## How it was built
