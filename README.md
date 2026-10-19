@@ -2,6 +2,8 @@
 
 **Know where your money goes, week by week.** Ledger is a personal finance tracker that starts with food, the spending that's easiest to lose track of. Today it tracks grocery spending against a weekly budget and counts meals out; more categories, income and bills are on the [roadmap](#roadmap).
 
+**Try it: [www.calmledger.app](https://www.calmledger.app)**
+
 <p align="center">
   <img src="docs/screenshots/home.png" width="360" alt="Ledger's Home screen: $50.32 of food budget left this week, $99.68 of $150.00 spent, marked On track; 0 of 1 meals out; buttons to paste a receipt or add a purchase manually.">
   <img src="docs/screenshots/purchase.png" width="360" alt="A saved receipt purchase: Whole Foods Market, $77.37, with its parsed items, prices, quantities and savings.">
