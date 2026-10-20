@@ -37,7 +37,7 @@ export default function SettingsForm({
   return (
     <form onSubmit={action} className="stack">
       <label>
-        Weekly grocery budget (USD)
+        Weekly food budget (USD)
         <input
           name="budget"
           inputMode="decimal"

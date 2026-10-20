@@ -17,8 +17,8 @@ export default async function PurchasePage({
   return (
     <>
       <nav>
-        <Link href="/" prefetch={false}>
-          ← Home
+        <Link href="/purchases" prefetch={false}>
+          ← All purchases
         </Link>
       </nav>
       <p className="eyebrow">
@@ -40,11 +40,19 @@ export default async function PurchasePage({
                   item.unit_price_cents !== null ||
                   item.savings_cents > 0) && (
                   <span className="muted item-detail">
-                    {item.quantity !== 1 && `Qty ${item.quantity}`}
-                    {item.unit_price_cents !== null &&
-                      ` @ ${money(item.unit_price_cents)}`}
-                    {item.savings_cents > 0 &&
-                      ` · saved ${money(item.savings_cents)}`}
+                    {[
+                      [
+                        item.quantity !== 1 && `Qty ${item.quantity}`,
+                        item.unit_price_cents !== null &&
+                          `@ ${money(item.unit_price_cents)}`,
+                      ]
+                        .filter(Boolean)
+                        .join(" "),
+                      item.savings_cents > 0 &&
+                        `saved ${money(item.savings_cents)}`,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
                   </span>
                 )}
               </li>

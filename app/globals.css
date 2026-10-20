@@ -305,8 +305,12 @@ legend {
   padding: var(--sp0) 0;
   border-bottom: 1px solid #38383f;
 }
+.purchase-list li:first-child {
+  padding-top: 0;
+}
 .purchase-list li:last-child {
   border-bottom: 0;
+  padding-bottom: 0;
 }
 .purchase-name {
   font-weight: 600;

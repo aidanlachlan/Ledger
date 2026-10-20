@@ -101,7 +101,9 @@ export default async function History({
           </p>
           <p className="muted">
             {past.length
-              ? `Over the last ${past.length} full ${past.length === 1 ? "week" : "weeks"}`
+              ? past.length === 1
+                ? "Over your last full week"
+                : `Over the last ${past.length} full weeks`
               : "Shows after your first full week"}
           </p>
         </section>

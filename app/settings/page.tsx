@@ -13,7 +13,7 @@ export default async function Settings() {
           ← Home
         </Link>
       </nav>
-      <h1>Make the week yours.</h1>
+      <h1>Settings</h1>
       <p className="muted">
         Your limits are personal. Changes apply immediately to this week, Monday
         through Sunday.
