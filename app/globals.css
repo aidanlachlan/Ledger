@@ -191,6 +191,12 @@ button:disabled {
 }
 .search label {
   flex: 1;
+  min-width: 0;
+}
+.search button {
+  width: auto;
+  flex: none;
+  padding-inline: 22px;
 }
 .view-switch .button {
   flex: 1;
