@@ -17,6 +17,11 @@ export default function ScanEntry({
   const [receipt, setReceipt] = useState<ParsedReceipt | null>(null);
   if (receipt)
     return <ReceiptReview receipt={receipt} today={today} stores={stores} />;
+  function pick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (file) void scan(file);
+  }
   async function scan(file: File) {
     setError("");
     setProgress({ step: "loading", percent: 0 });
@@ -35,20 +40,34 @@ export default function ScanEntry({
   }
   return (
     <div className="stack">
-      <label className={`button primary file-pick ${progress ? "busy" : ""}`}>
-        {progress ? "Reading receipt…" : "Take or choose a photo"}
-        <input
-          className="sr-only"
-          type="file"
-          accept="image/*"
-          disabled={progress !== null}
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            e.target.value = "";
-            if (file) void scan(file);
-          }}
-        />
-      </label>
+      {progress ? (
+        <p className="button primary file-pick busy" aria-hidden="true">
+          Reading receipt…
+        </p>
+      ) : (
+        <>
+          {/* Opens the camera directly; shown only on touch devices. */}
+          <label className="button primary file-pick take-photo">
+            Take a photo
+            <input
+              className="sr-only"
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={pick}
+            />
+          </label>
+          <label className="button primary file-pick choose-photo">
+            Choose a photo
+            <input
+              className="sr-only"
+              type="file"
+              accept="image/*"
+              onChange={pick}
+            />
+          </label>
+        </>
+      )}
       {progress && (
         <div className="notice" role="status">
           <p>

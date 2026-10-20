@@ -12,7 +12,7 @@ export default async function Scan() {
       </nav>
       <h1>From receipt to clarity.</h1>
       <p className="muted">
-        Take or choose a photo of your receipt, then review what you paid.
+        Scan a photo of your receipt, then review what you paid.
       </p>
       <ScanEntry today={context.today} stores={stores} />
     </>
