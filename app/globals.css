@@ -372,7 +372,7 @@ legend {
 }
 .skeleton-block {
   border-radius: var(--radius-xl);
-  background: #141417;
+  background: #1e1e23;
   animation: skeleton-pulse 1.6s ease-in-out infinite;
 }
 .skeleton-title {
