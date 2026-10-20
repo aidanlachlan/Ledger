@@ -88,8 +88,8 @@ export default function ScanEntry({
         </p>
       )}
       <p className="helper">
-        The photo is read on this device and never uploaded. Lay the receipt
-        flat on a dark surface, fill the frame, and avoid shadows and creases.
+        Lay the receipt flat on a dark surface, fill the frame, and avoid
+        shadows and creases.
       </p>
       <p className="helper">
         Not reading well?{" "}

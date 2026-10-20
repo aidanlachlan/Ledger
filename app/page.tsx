@@ -91,6 +91,9 @@ export default async function Home({
         <Link className="button primary" href="/scan" prefetch={false}>
           Scan receipt
         </Link>
+        <Link className="button" href="/paste" prefetch={false}>
+          Paste receipt
+        </Link>
         <Link className="button" href="/add" prefetch={false}>
           Add manually
         </Link>

@@ -10,7 +10,7 @@ export default async function Scan() {
           ← Home
         </Link>
       </nav>
-      <h1>From receipt to clarity.</h1>
+      <h1>Scan a receipt</h1>
       <p className="muted">
         Scan a photo of your receipt, then review what you paid.
       </p>

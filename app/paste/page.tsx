@@ -13,7 +13,7 @@ export default async function Paste() {
           ← Home
         </Link>
       </nav>
-      <h1>From receipt to clarity.</h1>
+      <h1>Paste a receipt</h1>
       <p className="muted">
         Paste copied text, then review what you paid. Or{" "}
         <Link href="/scan" prefetch={false}>
