@@ -22,7 +22,14 @@ export default function RootLayout({
               Ledger
               <span className="brand-dot" aria-hidden="true" />
             </Link>
-            <span>Food, in perspective.</span>
+            <span>
+              {/* Braces hint that the category will be changeable. */}
+              <span className="category">
+                <span aria-hidden="true">{"{"}</span>Food
+                <span aria-hidden="true">{"}"}</span>
+              </span>
+              , in perspective.
+            </span>
           </header>
           <main id="main">{children}</main>
         </div>
