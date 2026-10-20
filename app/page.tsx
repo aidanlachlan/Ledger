@@ -2,8 +2,8 @@ import Link from "next/link";
 import { getContext, getPurchases, getRecentPurchases } from "../lib/data";
 import { budgetStatus, progressPercent, weekBounds } from "../lib/week";
 import { money } from "../lib/money";
-import { typeLabels } from "../lib/validation";
 import { signOut } from "./actions";
+import PurchaseList from "./components/purchase-list";
 
 export default async function Home({
   searchParams,
@@ -78,26 +78,12 @@ export default async function Home({
       <section className="card">
         <h2>Recent purchases</h2>
         {recent.length ? (
-          <ul className="purchase-list">
-            {recent.map((p) => (
-              <li key={p.id}>
-                <Link
-                  className="purchase-name"
-                  href={`/purchases/${p.id}`}
-                  prefetch={false}
-                >
-                  {p.store_name}
-                </Link>
-                <span className="purchase-amount amount">
-                  {money(p.total_cents)}
-                </span>
-                <span className="muted">
-                  {typeLabels[p.type]} ·{" "}
-                  <time dateTime={p.purchased_on}>{p.purchased_on}</time>
-                </span>
-              </li>
-            ))}
-          </ul>
+          <>
+            <PurchaseList purchases={recent} />
+            <Link href="/purchases" prefetch={false}>
+              All purchases →
+            </Link>
+          </>
         ) : (
           <p className="muted">
             Your first purchase starts the picture. Paste a receipt or add one

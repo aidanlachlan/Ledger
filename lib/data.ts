@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { requireUser } from "./auth";
 import type { BudgetChange } from "./history";
+import { likePattern } from "./validation";
 import { todayIn } from "./week";
 
 const purchaseRow = z.object({
@@ -159,4 +160,27 @@ export async function getStoreNames(): Promise<string[]> {
     rows.forEach((row) => names.add(row.store_name));
     if (rows.length < 1000) return [...names].sort();
   }
+}
+
+export const PAGE_SIZE = 50;
+
+/** One page of purchases, newest first, optionally filtered by store name. */
+export async function searchPurchases(
+  storeQuery: string,
+  page: number,
+): Promise<{ purchases: Purchase[]; total: number }> {
+  const { supabase } = await requireUser();
+  let query = supabase
+    .from("purchases")
+    .select(purchaseColumns, { count: "exact" })
+    .order("purchased_on", { ascending: false })
+    .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+  if (storeQuery) query = query.ilike("store_name", likePattern(storeQuery));
+  const { data, error, count } = await query;
+  // A page past the end (e.g. an old link) is just empty, not an error.
+  if (error?.code === "PGRST103") return { purchases: [], total: 0 };
+  if (error) throw new Error(loadError);
+  return { purchases: z.array(purchaseRow).parse(data), total: count ?? 0 };
 }

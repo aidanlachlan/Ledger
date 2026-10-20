@@ -1,5 +1,10 @@
 import { expect, it } from "vitest";
-import { passwordInput, purchaseInput, settingsInput } from "./validation";
+import {
+  likePattern,
+  passwordInput,
+  purchaseInput,
+  settingsInput,
+} from "./validation";
 const manual = {
   requestId: "6b43af7b-2a9a-4d0c-bf57-7ad27e0c8e49",
   storeName: " Shop ",
@@ -70,4 +75,9 @@ it("requires passwords of 8 to 72 characters", () => {
   expect(passwordInput.safeParse("short").success).toBe(false);
   expect(passwordInput.safeParse("long enough").success).toBe(true);
   expect(passwordInput.safeParse("x".repeat(73)).success).toBe(false);
+});
+
+it("escapes LIKE wildcards in search terms", () => {
+  expect(likePattern("Trader Joe's")).toBe("%Trader Joe's%");
+  expect(likePattern("50%_off\\")).toBe("%50\\%\\_off\\\\%");
 });

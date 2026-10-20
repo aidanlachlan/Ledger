@@ -180,7 +180,17 @@ button:disabled {
 }
 .view-switch {
   flex-direction: row;
+  align-items: center;
   margin: 12px 0 20px;
+}
+.search {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin: 12px 0 8px;
+}
+.search label {
+  flex: 1;
 }
 .view-switch .button {
   flex: 1;

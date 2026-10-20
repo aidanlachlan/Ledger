@@ -120,3 +120,8 @@ export const typeLabels = {
   convenience: "Convenience",
 } as const;
 export type ActionResult = { error?: string; success?: string; id?: string };
+
+/** Escapes a search term for a SQL LIKE pattern, so %, _ and \ match literally. */
+export function likePattern(term: string): string {
+  return `%${term.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
+}
