@@ -23,10 +23,10 @@ export default function RootLayout({
               <span className="brand-dot" aria-hidden="true" />
             </Link>
             <span>
-              {/* Braces hint that the category will be changeable. */}
+              {/* Parentheses hint that the category will be changeable. */}
               <span className="category">
-                <span aria-hidden="true">{"{"}</span>Food
-                <span aria-hidden="true">{"}"}</span>
+                <span aria-hidden="true">(</span>Food
+                <span aria-hidden="true">)</span>
               </span>
               , in perspective.
             </span>
