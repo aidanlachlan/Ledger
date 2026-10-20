@@ -165,7 +165,8 @@ export default function WeeklyChart({
                   y1={y(week.limit)}
                   y2={y(week.limit)}
                 />
-                {(i % labelEvery === 0 || i === weeks.length - 1) && (
+                {/* Count from the end, so the last label never crowds the one before. */}
+                {(weeks.length - 1 - i) % labelEvery === 0 && (
                   <text className="axis" x={cx} y={H - 6} textAnchor="middle">
                     {i === weeks.length - 1
                       ? unit === "week"
