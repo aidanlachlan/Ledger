@@ -12,6 +12,19 @@ const config: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
         ],
       },
+      {
+        // The OCR worker and its files. The worker compiles WebAssembly, so
+        // it needs 'wasm-unsafe-eval'; pages keep their stricter policy.
+        source: "/ocr/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value:
+              "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'",
+          },
+          { key: "Cache-Control", value: "public, max-age=86400" },
+        ],
+      },
     ];
   },
 };

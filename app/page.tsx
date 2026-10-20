@@ -88,8 +88,8 @@ export default async function Home({
         </section>
       </div>
       <div className="actions">
-        <Link className="button primary" href="/paste" prefetch={false}>
-          Paste receipt
+        <Link className="button primary" href="/scan" prefetch={false}>
+          Scan receipt
         </Link>
         <Link className="button" href="/add" prefetch={false}>
           Add manually
@@ -106,7 +106,7 @@ export default async function Home({
           </>
         ) : (
           <p className="muted">
-            Your first purchase starts the picture. Paste a receipt or add one
+            Your first purchase starts the picture. Scan a receipt or add one
             manually.
           </p>
         )}

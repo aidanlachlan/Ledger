@@ -2,6 +2,8 @@
 
 > **Update, October 18, 2026.** The record below is from the first build. Since then, purchase editing and deletion, password sign-in, and weekly history with budget history were added (migrations `0002`–`0004`). Current state: typecheck, lint and production build pass; `npm test` passes 23 tests across 4 files; `npm run test:db` applies all four migrations and also covers manual-purchase items, edit and delete, and budget history. Logged-in browser flows on a hosted Supabase project are still unverified.
 
+> **Update, October 20, 2026.** Added receipt scanning: photos are read on-device with Tesseract.js, served from `/ocr` with its own Content Security Policy (`script-src 'self' 'wasm-unsafe-eval'`); pages add only `worker-src 'self'`. The parser now reads Thriftway-style layouts (prices on the line after the name, deal lines, `TAX-VALUE` tables, `BALANCE DUE`) and never fills an unreadable price from the total; it only suggests one. Checked: typecheck, lint, 40 unit tests, production build. In Chromium against a production build, scanning a real Thriftway photo took about 4.3 seconds, with no CSP errors and no requests outside the app; 12 of 13 prices were read correctly and the one unreadable price was left blank with the correct suggested amount. Across nine image scales, the parser got 12 of 13 prices right every time. Item names from OCR are often garbled and need review. Not yet tested on a real iPhone or Android device.
+
 Implemented and checked on October 15, 2026. Runtime for final checks: Node 24.22.0. No real Supabase credentials were configured.
 
 | Check                                             | Result                                               |

@@ -14,7 +14,13 @@ export default async function Paste() {
         </Link>
       </nav>
       <h1>From receipt to clarity.</h1>
-      <p className="muted">Paste copied text, then review what you paid.</p>
+      <p className="muted">
+        Paste copied text, then review what you paid. Or{" "}
+        <Link href="/scan" prefetch={false}>
+          scan a photo
+        </Link>{" "}
+        instead.
+      </p>
       <PasteEntry
         today={context.today}
         stores={stores}

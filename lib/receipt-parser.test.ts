@@ -26,7 +26,7 @@ describe("receipt parser", () => {
       totalCents: 7737,
       mathCheck: "ok",
     });
-    expect(r.items.reduce((n, x) => n + x.lineTotalCents, 0)).toBe(7531);
+    expect(r.items.reduce((n, x) => n + x.lineTotalCents!, 0)).toBe(7531);
     expect(JSON.stringify(r)).not.toMatch(/0000|AID/);
   });
   it("pairs the exact column layout", () => {
@@ -120,6 +120,156 @@ describe("receipt parser", () => {
       "SHOP\n" + "FOOD $1.00\n".repeat(201),
     ])
       expect(() => parseReceipt(input)).toThrow();
+  });
+});
+// West Seattle Thriftway, typed from the paper receipt. Prices for
+// multi-buys and bag fees sit on the line after the item's name.
+const thriftway = [
+  "West Seattle Thriftway #603",
+  "Total:                         USD$ 52.38",
+  "DELI GROCERY",
+  "NAT ORG BRWN EGGS              $6.59  F",
+  "WHITE CHEDDA                   $4.99  F",
+  "You saved:   $ 0.30",
+  ...Array(4).fill("You saved:   $ 0.74"),
+  ...Array(4).fill("TLMK YOGURT\n1 @  4 FOR $5.00      $1.25  F"),
+  "FROZEN",
+  "MANGOS                         $4.89  F",
+  "FRUIT IMMUNITY BLEND           $7.69  F",
+  "GROCERY",
+  "BAG FEE PAPER",
+  "2 @    $0.08 EA                $0.16",
+  "MEAT",
+  "BEEFALO                        $11.99 F",
+  "ORGANIC PRODUCE",
+  "AVOCADO LG ORGANIC",
+  "2 @  2 FOR $4.00               $4.00  F",
+  "You saved:  $ 3.98",
+  "MISC BABY PEELE                $3.99  F",
+  "SOFT DRINKS",
+  "LOTUS ENERGY                   $2.79 T F",
+  "You saved:  $ 0.40",
+  "TOTAL                          $52.09",
+  "TAX-CODE   TAXABLE-VAL   TAX-VALUE",
+  "SALE TX10.55     $2.79     $0.29",
+  "15 BALANCE DUE                 $52.38",
+  "VISA                           $52.38",
+  "CHANGE                         $0.00",
+  "Your Savings Today",
+  "Item Savings                   $7.64",
+].join("\n");
+// The same receipt as on-device OCR read it from a photo: the eggs' price
+// and one yogurt's are unreadable, flags are misread, a label is garbled
+// and the balance due line is missing.
+const thriftwayScan = thriftway
+  .replace("Thriftway #603", "Thriftway #603\n&")
+  .replace(
+    "NAT ORG BRWN EGGS              $6.59  F",
+    "“ks ORE  BRU EGGS   danas   F",
+  )
+  .replace("$1.25  F", "$1.25 2upk")
+  .replace("$1.25  F", "$1525 EE")
+  .replace("2 @    $0.08 EA", "20     $0.08 EA")
+  .replace("15 BALANCE DUE                 $52.38\n", "")
+  .replace("Item Savings", "Str Savings");
+describe("thriftway receipts", () => {
+  const items = [
+    ["NAT ORG BRWN EGGS", 659],
+    ["WHITE CHEDDA", 499],
+    ["TLMK YOGURT", 125],
+    ["TLMK YOGURT", 125],
+    ["TLMK YOGURT", 125],
+    ["TLMK YOGURT", 125],
+    ["MANGOS", 489],
+    ["FRUIT IMMUNITY BLEND", 769],
+    ["BAG FEE PAPER", 16],
+    ["BEEFALO", 1199],
+    ["AVOCADO LG ORGANIC", 400],
+    ["MISC BABY PEELE", 399],
+    ["LOTUS ENERGY", 279],
+  ];
+  it("reads prices on the next line, deal lines, tax table and balance due", () => {
+    const r = parseReceipt(thriftway);
+    expect(r.items.map((i) => [i.rawName, i.lineTotalCents])).toEqual(items);
+    expect(r.items[2]).toMatchObject({ quantity: 1, savingsCents: 0 });
+    expect(r.items[1].savingsCents).toBe(30);
+    expect(r.items[8]).toMatchObject({ quantity: 2, unitPriceCents: 8 });
+    expect(r.items[10]).toMatchObject({ quantity: 2, savingsCents: 398 });
+    expect(r.items[12].savingsCents).toBe(40);
+    expect(r).toMatchObject({
+      storeName: "West Seattle Thriftway #603",
+      subtotalCents: 5209,
+      savingsCents: 764,
+      taxCents: 29,
+      totalCents: 5238,
+      mathCheck: "ok",
+      missingPrice: null,
+    });
+  });
+  it("survives OCR noise and suggests, never fills, one unreadable price", () => {
+    const r = parseReceipt(thriftwayScan);
+    expect(r.storeName).toBe("West Seattle Thriftway #603");
+    expect(r.items.map((i) => i.lineTotalCents)).toEqual([
+      null,
+      ...items.slice(1).map(([, cents]) => cents),
+    ]);
+    expect(r.items[0].rawName).toBe("ks ORE BRU EGGS danas");
+    expect(r.items[8]).toMatchObject({ quantity: 2, unitPriceCents: 8 });
+    expect(r).toMatchObject({
+      subtotalCents: 5209,
+      savingsCents: 764,
+      taxCents: 29,
+      totalCents: 5238,
+      mathCheck: "skipped",
+      missingPrice: { name: "ks ORE BRU EGGS danas", cents: 659 },
+    });
+  });
+  it("leaves a price blank when it cannot be worked out", () => {
+    const r = parseReceipt(
+      "SHOP\nEGGS ?? F\nMILK ?? F\nTax $0.00\nTotal $5.00",
+    );
+    expect(r.items.map((i) => i.lineTotalCents)).toEqual([null, null]);
+    expect(r).toMatchObject({ mathCheck: "skipped", missingPrice: null });
+  });
+  it("works out an unreadable line price from its deal", () => {
+    const prices = (line: string) =>
+      parseReceipt("SHOP\nITEM\n" + line).items.map((i) => i.lineTotalCents);
+    expect(prices("1@ 4 FOR $5.00   S12O NRE")).toEqual([125]);
+    expect(prices("2 @ 2 FOR $4.00   $4.0O F")).toEqual([400]);
+    expect(prices("3 @ $0.08 EA   $O.24")).toEqual([24]);
+    expect(prices("1 @ 3 FOR $5.00   ?")).toEqual([]);
+    expect(prices("999 @ $9999.99 EA   ?")).toEqual([]);
+    expect(prices("1 @ 4 FOR $5.00   $1.26 F")).toEqual([126]);
+  });
+  it("accepts misread flags but not a second amount", () => {
+    expect(parseReceipt("SHOP\nMILK $1.25 0 F").items[0].lineTotalCents).toBe(
+      125,
+    );
+    expect(parseReceipt("SHOP\nMILK 1.00 2.00").items[0].lineTotalCents).toBe(
+      200,
+    );
+  });
+  it("reads an amount in USD as a total even under a garbled label", () => {
+    expect(
+      parseReceipt("SHOP\nTota): USD$ 2.10\nFOOD $2.00\nTax $0.10"),
+    ).toMatchObject({ items: [{ lineTotalCents: 200 }], totalCents: 210 });
+  });
+  it("stops reading items once the totals start", () => {
+    expect(
+      parseReceipt("SHOP\nFOOD $1.00\nTotal $1.00\nStr Savings $7.64").items,
+    ).toHaveLength(1);
+  });
+  it("does not treat a deal price alone as the line price", () => {
+    expect(parseReceipt("SHOP\nYOGURT\n4 FOR $5.00").items).toEqual([]);
+    expect(parseReceipt("SHOP\nBAG\n2 @ $0.08 EA").items).toMatchObject([
+      { lineTotalCents: 16, quantity: 2, unitPriceCents: 8 },
+    ]);
+    expect(parseReceipt("SHOP\nUSD$ 52.38\n$ 3.98").items).toEqual([]);
+  });
+  it("uses the larger total when one is the other plus tax", () => {
+    expect(
+      parseReceipt("SHOP\nFOOD $9.00\nTotal $9.00\nTax $1.00\nTotal $10.00"),
+    ).toMatchObject({ subtotalCents: 900, totalCents: 1000, mathCheck: "ok" });
   });
 });
 describe("money", () => {

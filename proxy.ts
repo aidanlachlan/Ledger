@@ -12,6 +12,8 @@ export async function proxy(request: NextRequest) {
   const csp = [
     `default-src 'self'`,
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ""}`,
+    // The receipt scanner's OCR worker, served from /ocr with its own policy.
+    `worker-src 'self'`,
     `style-src 'self' 'unsafe-inline'`,
     `connect-src 'self' ${supabaseOrigin}${isDev ? " ws://localhost:* ws://127.0.0.1:*" : ""}`,
     `img-src 'self' data:`,
@@ -46,5 +48,5 @@ export async function proxy(request: NextRequest) {
   return response;
 }
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|ocr/).*)"],
 };

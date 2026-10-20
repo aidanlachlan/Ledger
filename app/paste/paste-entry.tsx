@@ -1,9 +1,7 @@
 "use client";
 import { useState } from "react";
-import { parseReceipt } from "../../lib/receipt-parser";
-import { decimal } from "../../lib/money";
-import type { PurchaseDraft } from "../../lib/validation";
-import PurchaseForm from "../components/purchase-form";
+import { parseReceipt, type ParsedReceipt } from "../../lib/receipt-parser";
+import ReceiptReview from "../components/receipt-review";
 
 export default function PasteEntry({
   today,
@@ -14,17 +12,9 @@ export default function PasteEntry({
 }) {
   const [text, setText] = useState("");
   const [error, setError] = useState("");
-  const [draft, setDraft] = useState<PurchaseDraft | null>(null);
-  if (draft)
-    return (
-      <>
-        <p className="notice">
-          Review every field before saving. Unrecognized details may need to be
-          entered by hand.
-        </p>
-        <PurchaseForm initial={draft} today={today} stores={stores} />
-      </>
-    );
+  const [receipt, setReceipt] = useState<ParsedReceipt | null>(null);
+  if (receipt)
+    return <ReceiptReview receipt={receipt} today={today} stores={stores} />;
   return (
     <form
       className="stack"
@@ -32,26 +22,7 @@ export default function PasteEntry({
         e.preventDefault();
         setError("");
         try {
-          const receipt = parseReceipt(text);
-          setDraft({
-            requestId: crypto.randomUUID(),
-            storeName: receipt.storeName || "",
-            purchasedOn: today,
-            type: "groceries",
-            source: "paste",
-            subtotal: decimal(receipt.subtotalCents),
-            savings: decimal(receipt.savingsCents),
-            tax: decimal(receipt.taxCents),
-            total: decimal(receipt.totalCents),
-            note: "",
-            items: receipt.items.map((item) => ({
-              name: item.rawName,
-              quantity: String(item.quantity),
-              unitPrice: decimal(item.unitPriceCents),
-              lineTotal: decimal(item.lineTotalCents),
-              savings: decimal(item.savingsCents),
-            })),
-          });
+          setReceipt(parseReceipt(text));
           setText("");
         } catch (err) {
           setError(
