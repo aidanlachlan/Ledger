@@ -319,6 +319,47 @@ legend {
     font-size: 48px;
   }
 }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.skeleton .card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.skeleton-bar {
+  height: 14px;
+  width: 60%;
+  border-radius: 8px;
+  background: #2a2a30;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+.skeleton-title {
+  height: 34px;
+  width: 40%;
+}
+.skeleton-heading {
+  width: 45%;
+}
+.skeleton-hero {
+  height: 44px;
+  width: 35%;
+}
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
