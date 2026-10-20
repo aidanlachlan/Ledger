@@ -15,12 +15,13 @@
 
 ## Features
 
-- **Weekly budget at a glance:** what's left, a progress bar, whether you're on track for the day of the week, and meals out against your limit.
+- **Weekly budget at a glance:** what's left, a progress bar, whether you're on track for the day of the week, meals out against your limits, and your total spending.
 - **Quick manual entry** with store autocomplete and **Repeat last**. Items are optional.
 - **Paste a receipt** ([how](#pasting-a-receipt)): Ledger pulls out the store, items, quantities, savings, tax and total, checks that the items add up, and lets you fix anything before saving.
 - **Edit and delete** any saved purchase.
-- **Weekly history:** spending and meals out per week, each against the budget you had *that* week.
-- **Settings:** weekly budget, meals-out limit and timezone. Weeks run Monday to Sunday in your timezone.
+- **History:** spending per week or per day, each against the budget you had at the time, plus meals out per week.
+- **All purchases:** every purchase, newest first, with store search.
+- **Settings:** weekly food budget, meals-out count and optional dollar budget, and timezone. Weeks run Monday to Sunday in your timezone.
 - **Sign in** with email and password, or a one-time email link. Forgot your password? A reset link takes you straight to choosing a new one, and changing your password signs out your other devices.
 
 ## Pasting a receipt
