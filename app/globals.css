@@ -416,13 +416,13 @@ button.danger {
 .settings-section {
   margin-top: 36px;
 }
-/* History charts: blue bars within the limit, red bars over it, and the
-   limit itself as a yellow dashed line. Blue and red stay distinct for
-   common colorblindness, both clear 3:1 on the card surface (#17171a), and
-   the tooltip and table also say "over" in words. */
+/* History charts: monochrome bars, told apart by lightness, which holds for
+   colorblind viewers; both clear 3:1 on the card surface (#17171a). The
+   limit is the yellow accent as a dashed line. The tooltip and table also
+   say "over" in words. */
 .chart {
-  --bar: var(--accent);
-  --bar-over: #ff5a5a;
+  --bar: #6e6e78;
+  --bar-over: #ececf0;
   margin: 0;
 }
 .chart figcaption h2 {
