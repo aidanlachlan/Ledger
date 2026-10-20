@@ -648,18 +648,4 @@ button.danger {
   opacity: 0.7;
   cursor: wait;
 }
-/* Phones and tablets get a camera button first; choosing becomes secondary.
-   Computers only get "Choose a photo". */
-.take-photo {
-  display: none;
-}
-@media (pointer: coarse) {
-  .take-photo {
-    display: flex;
-  }
-  .choose-photo {
-    background: #222227;
-    border-color: #45454f;
-    color: var(--text);
-  }
-}
+

@@ -14,6 +14,7 @@ export default function ScanEntry({
 }) {
   const [progress, setProgress] = useState<ReadProgress | null>(null);
   const [error, setError] = useState("");
+  const [cameraNote, setCameraNote] = useState(false);
   const [receipt, setReceipt] = useState<ParsedReceipt | null>(null);
   if (receipt)
     return <ReceiptReview receipt={receipt} today={today} stores={stores} />;
@@ -46,8 +47,16 @@ export default function ScanEntry({
         </p>
       ) : (
         <>
-          {/* Opens the camera directly; shown only on touch devices. */}
-          <label className="button primary file-pick take-photo">
+          {/* Opens the camera on phones; computers can't, so explain instead. */}
+          <label
+            className="button primary file-pick"
+            onClick={(e) => {
+              if (!matchMedia("(pointer: coarse)").matches) {
+                e.preventDefault();
+                setCameraNote(true);
+              }
+            }}
+          >
             Take a photo
             <input
               className="sr-only"
@@ -57,7 +66,13 @@ export default function ScanEntry({
               onChange={pick}
             />
           </label>
-          <label className="button primary file-pick choose-photo">
+          {cameraNote && (
+            <p className="notice" role="status">
+              Taking a photo needs your phone&rsquo;s camera. Choose a photo
+              instead, or open Ledger on your phone.
+            </p>
+          )}
+          <label className="button file-pick">
             Choose a photo
             <input
               className="sr-only"
