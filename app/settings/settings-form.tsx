@@ -3,16 +3,18 @@ import { useState, useTransition } from "react";
 import { saveSettings } from "../actions";
 import { money } from "../../lib/money";
 import { moneyInput, type ActionResult } from "../../lib/validation";
-import { monthlyEquivalent } from "../../lib/week";
+import { daysInMonth, monthName, monthlyEquivalent } from "../../lib/week";
 export default function SettingsForm({
   budget,
   meals,
   mealsBudget,
   timezone,
+  today,
 }: {
   budget: string;
   meals: string;
   mealsBudget: string;
+  today: string;
   timezone: string;
 }) {
   const [state, setState] = useState<ActionResult>({});
@@ -51,7 +53,7 @@ export default function SettingsForm({
         <span className="helper">
           Includes groceries and convenience purchases.
           {weekly.success &&
-            ` About ${money(monthlyEquivalent(weekly.data))} a month.`}
+            ` That’s ${money(monthlyEquivalent(weekly.data, daysInMonth(today)))} for the ${daysInMonth(today)} days of ${monthName(today)}.`}
         </span>
       </label>
       <label>

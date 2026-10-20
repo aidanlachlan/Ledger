@@ -3,6 +3,7 @@ import { getContext, getPurchases, getRecentPurchases } from "../lib/data";
 import {
   budgetStatus,
   daysInMonth,
+  monthName,
   monthlyEquivalent,
   progressPercent,
   weekBounds,
@@ -125,8 +126,3 @@ export default async function Home({
     </>
   );
 }
-
-const monthName = (date: string) =>
-  new Intl.DateTimeFormat("en-US", { month: "long", timeZone: "UTC" }).format(
-    new Date(`${date}T12:00:00Z`),
-  );

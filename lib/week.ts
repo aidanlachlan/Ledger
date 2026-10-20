@@ -55,11 +55,8 @@ export function progressPercent(spent: number, budget: number): number {
     : Math.min(100, Math.max(0, (spent / budget) * 100));
 }
 
-/** A weekly amount over a month of `days` days; defaults to an average month (52 weeks ÷ 12). */
-export function monthlyEquivalent(
-  weeklyCents: number,
-  days = (52 * 7) / 12,
-): number {
+/** A weekly amount over a month of `days` days. */
+export function monthlyEquivalent(weeklyCents: number, days: number): number {
   return Math.round((weeklyCents * days) / 7);
 }
 
@@ -67,4 +64,12 @@ export function monthlyEquivalent(
 export function daysInMonth(date: string): number {
   const [year, month] = date.split("-").map(Number);
   return new Date(Date.UTC(year, month, 0)).getUTCDate();
+}
+
+/** Full month name of a YYYY-MM-DD date, e.g. "October". */
+export function monthName(date: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    timeZone: "UTC",
+  }).format(new Date(`${date}T12:00:00Z`));
 }
