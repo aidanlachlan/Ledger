@@ -375,16 +375,42 @@ legend {
   background: #1e1e23;
   animation: skeleton-pulse 1.6s ease-in-out infinite;
 }
-.skeleton-title {
+.sk-back {
+  height: var(--sp0);
+  width: 22%;
+  border-radius: var(--radius);
+}
+.sk-title {
   height: var(--sp2);
-  width: 38%;
+  width: 40%;
   border-radius: var(--radius-lg);
 }
-.skeleton-card {
+.sk-line {
+  height: var(--sp0);
+  width: 55%;
+  border-radius: var(--radius);
+}
+.sk-hero {
+  height: var(--sp2h);
+  width: 35%;
+  border-radius: var(--radius-lg);
+}
+.sk-switch,
+.sk-button,
+.sk-field {
+  height: 48px;
+  border-radius: var(--radius-lg);
+}
+.sk-card {
   height: 13rem;
 }
-.skeleton-card.short {
+.sk-card-short {
   height: 8rem;
+}
+.sk-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp0h);
 }
 @keyframes skeleton-appear {
   to {
