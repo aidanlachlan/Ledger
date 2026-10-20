@@ -416,10 +416,9 @@ button.danger {
 .settings-section {
   margin-top: 36px;
 }
-/* History charts: monochrome bars, told apart by lightness, which holds for
-   colorblind viewers; both clear 3:1 on the card surface (#17171a). The
-   limit is the yellow accent as a dashed line. The tooltip and table also
-   say "over" in words. */
+/* History charts: monochrome. Over-limit bars are told apart by lightness,
+   which holds for colorblind viewers; both bars clear 3:1 on the card
+   surface (#17171a). The tooltip and table also say "over" in words. */
 .chart {
   --bar: #6e6e78;
   --bar-over: #ececf0;
@@ -458,7 +457,7 @@ button.danger {
 .swatch.limit {
   height: 0;
   border-radius: 0;
-  border-top: 2px dashed var(--accent-2);
+  border-top: 2px dashed var(--muted);
 }
 .chart-plot {
   position: relative;
@@ -484,7 +483,7 @@ button.danger {
   fill: var(--bar-over);
 }
 .chart .limit {
-  stroke: var(--accent-2);
+  stroke: var(--muted);
   stroke-width: 2;
   stroke-dasharray: 3 2;
 }
