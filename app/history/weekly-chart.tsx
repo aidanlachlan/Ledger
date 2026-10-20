@@ -73,7 +73,8 @@ export default function WeeklyChart({
         <h2>{title}</h2>
         <ul className="legend" aria-label="Legend">
           <li>
-            <span className="swatch bar" aria-hidden /> {valueLabel}
+            <span className="swatch bar" aria-hidden /> Within{" "}
+            {limitLabel.toLowerCase()}
           </li>
           <li>
             <span className="swatch over" aria-hidden /> Over{" "}

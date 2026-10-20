@@ -7,6 +7,7 @@
   --text: #f5f5f5;
   --muted: #b8b8be;
   --accent: #4c8dff;
+  --accent-2: #ffc24b;
 }
 * {
   box-sizing: border-box;
@@ -111,10 +112,10 @@ progress {
   font-weight: 600;
 }
 .on-track {
-  color: #3ddc84;
+  color: var(--accent);
 }
 .watch {
-  color: #ffc24b;
+  color: var(--accent-2);
 }
 .over,
 .error {
@@ -415,12 +416,13 @@ button.danger {
 .settings-section {
   margin-top: 36px;
 }
-/* Weekly history charts: monochrome. Over-budget weeks are told apart by
-   lightness, which holds for colorblind viewers; both bars clear 3:1 on the
-   card surface (#17171a). The tooltip and table also say "over" in words. */
+/* History charts: blue bars within the limit, red bars over it, and the
+   limit itself as a yellow dashed line. Blue and red stay distinct for
+   common colorblindness, both clear 3:1 on the card surface (#17171a), and
+   the tooltip and table also say "over" in words. */
 .chart {
-  --bar: #6e6e78;
-  --bar-over: #ececf0;
+  --bar: var(--accent);
+  --bar-over: #ff5a5a;
   margin: 0;
 }
 .chart figcaption h2 {
@@ -456,7 +458,7 @@ button.danger {
 .swatch.limit {
   height: 0;
   border-radius: 0;
-  border-top: 2px dashed var(--muted);
+  border-top: 2px dashed var(--accent-2);
 }
 .chart-plot {
   position: relative;
@@ -482,7 +484,7 @@ button.danger {
   fill: var(--bar-over);
 }
 .chart .limit {
-  stroke: var(--muted);
+  stroke: var(--accent-2);
   stroke-width: 2;
   stroke-dasharray: 3 2;
 }
