@@ -80,7 +80,7 @@ export async function getContext() {
     supabase.from("profiles").select("timezone").single(),
     supabase
       .from("food_budgets")
-      .select("grocery_weekly_cents,meals_out_weekly")
+      .select("grocery_weekly_cents,meals_out_weekly,meals_out_weekly_cents")
       .single(),
   ]);
   if (profile.error || budget.error)
@@ -92,6 +92,7 @@ export async function getContext() {
     .object({
       grocery_weekly_cents: z.number().int(),
       meals_out_weekly: z.number().int(),
+      meals_out_weekly_cents: z.number().int().nullable(),
     })
     .parse(budget.data);
   return { supabase, timezone, today: todayIn(timezone), ...limits };

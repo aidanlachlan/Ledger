@@ -1,14 +1,51 @@
 import Link from "next/link";
 import { getBudgetHistory, getContext, getPurchases } from "../../lib/data";
-import { weekStarts, weeklyHistory } from "../../lib/history";
+import { dailyHistory, weekStarts, weeklyHistory } from "../../lib/history";
 import { money } from "../../lib/money";
-import { weekBounds } from "../../lib/week";
+import { addDays, weekBounds } from "../../lib/week";
 import WeeklyChart from "./weekly-chart";
 
 const MAX_WEEKS = 12;
+const DAYS = 14;
 
-export default async function History() {
+export default async function History({
+  searchParams,
+}: {
+  searchParams: Promise<{ view?: string }>;
+}) {
   const context = await getContext();
+  const fallback = {
+    budgetCents: context.grocery_weekly_cents,
+    mealsLimit: context.meals_out_weekly,
+  };
+  if ((await searchParams).view === "days") {
+    const days = Array.from({ length: DAYS }, (_, i) =>
+      addDays(context.today, i - DAYS + 1),
+    );
+    const [purchases, changes] = await Promise.all([
+      getPurchases(days[0]),
+      getBudgetHistory(),
+    ]);
+    return (
+      <>
+        <HistoryHeader view="days" />
+        <section className="card">
+          <WeeklyChart
+            title="Food spending per day"
+            kind="money"
+            unit="day"
+            valueLabel="Spent"
+            limitLabel="Daily share"
+            weeks={dailyHistory(purchases, changes, days, fallback)}
+          />
+          <p className="helper">
+            Groceries and convenience over the last {DAYS} days. The daily
+            share is that week&rsquo;s budget divided by seven.
+          </p>
+        </section>
+      </>
+    );
+  }
   const current = weekBounds(context.today).start;
   const windowStart = weekStarts(current, MAX_WEEKS)[0];
   const [purchases, changes] = await Promise.all([
@@ -31,10 +68,12 @@ export default async function History() {
       (Date.parse(current) - Date.parse(firstWeek)) / (7 * 86_400_000),
     ) + 1,
   );
-  const weeks = weeklyHistory(purchases, changes, weekStarts(current, count), {
-    budgetCents: context.grocery_weekly_cents,
-    mealsLimit: context.meals_out_weekly,
-  });
+  const weeks = weeklyHistory(
+    purchases,
+    changes,
+    weekStarts(current, count),
+    fallback,
+  );
   const past = weeks.slice(0, -1);
   const within = past.filter((w) => w.spentCents <= w.budgetCents).length;
   const average = past.length
@@ -42,13 +81,7 @@ export default async function History() {
     : null;
   return (
     <>
-      <nav>
-        <Link href="/" prefetch={false}>
-          ← Home
-        </Link>
-      </nav>
-      <p className="eyebrow">Week by week</p>
-      <h1>How your weeks add up.</h1>
+      <HistoryHeader view="weeks" />
       <p className="muted">
         Each week runs Monday to Sunday and is measured against the budget you
         had that week.
@@ -108,6 +141,32 @@ export default async function History() {
           weeks are shown.
         </p>
       )}
+    </>
+  );
+}
+
+function HistoryHeader({ view }: { view: "weeks" | "days" }) {
+  return (
+    <>
+      <nav>
+        <Link href="/" prefetch={false}>
+          ← Home
+        </Link>
+      </nav>
+      <h1>History</h1>
+      <div className="actions view-switch" role="group" aria-label="View">
+        {(["weeks", "days"] as const).map((option) => (
+          <Link
+            key={option}
+            className={option === view ? "button primary" : "button"}
+            href={option === "weeks" ? "/history" : "/history?view=days"}
+            aria-current={option === view ? "page" : undefined}
+            prefetch={false}
+          >
+            {option === "weeks" ? "Weeks" : "Days"}
+          </Link>
+        ))}
+      </div>
     </>
   );
 }

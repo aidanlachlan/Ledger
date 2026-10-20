@@ -5,10 +5,12 @@ import type { ActionResult } from "../../lib/validation";
 export default function SettingsForm({
   budget,
   meals,
+  mealsBudget,
   timezone,
 }: {
   budget: string;
   meals: string;
+  mealsBudget: string;
   timezone: string;
 }) {
   const [state, setState] = useState<ActionResult>({});
@@ -28,7 +30,7 @@ export default function SettingsForm({
       }
     });
   };
-  const [values, setValues] = useState({ budget, meals, timezone });
+  const [values, setValues] = useState({ budget, meals, mealsBudget, timezone });
   return (
     <form onSubmit={action} className="stack">
       <label>
@@ -61,6 +63,24 @@ export default function SettingsForm({
         />
         <span className="helper">
           Each eating-out purchase counts as one meal.
+        </span>
+      </label>
+      <label>
+        Weekly meals-out budget (USD, optional)
+        <input
+          name="mealsBudget"
+          inputMode="decimal"
+          maxLength={20}
+          value={values.mealsBudget}
+          onChange={(e) =>
+            setValues((current) => ({
+              ...current,
+              mealsBudget: e.target.value,
+            }))
+          }
+        />
+        <span className="helper">
+          Leave blank for no limit. Kept separate from the food budget.
         </span>
       </label>
       <label>

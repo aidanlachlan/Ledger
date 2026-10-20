@@ -45,13 +45,23 @@ it("validates settings boundaries and timezone", () => {
     settingsInput.safeParse({
       budget: "150",
       meals: "1",
+      mealsBudget: "",
       timezone: "America/Los_Angeles",
     }).success,
   ).toBe(true);
   expect(
     settingsInput.safeParse({
       budget: "150",
+      meals: "1",
+      mealsBudget: "60.50",
+      timezone: "America/Los_Angeles",
+    }).data?.mealsBudget,
+  ).toBe(6050);
+  expect(
+    settingsInput.safeParse({
+      budget: "150",
       meals: "101",
+      mealsBudget: "",
       timezone: "Invalid/Zone",
     }).success,
   ).toBe(false);

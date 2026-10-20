@@ -1,5 +1,10 @@
 import { expect, it } from "vitest";
-import { limitsFor, weekStarts, weeklyHistory } from "./history";
+import {
+  dailyHistory,
+  limitsFor,
+  weekStarts,
+  weeklyHistory,
+} from "./history";
 
 const fallback = { budgetCents: 15000, mealsLimit: 1 };
 const changes = [
@@ -56,5 +61,21 @@ it("totals each Monday-Sunday week like Home does", () => {
       budgetCents: 12000,
       mealsLimit: 2,
     },
+  ]);
+});
+
+it("totals food per day against that week's daily budget share", () => {
+  const purchases = [
+    { purchased_on: "2026-10-11", type: "groceries", total_cents: 500 },
+    { purchased_on: "2026-10-12", type: "groceries", total_cents: 1000 },
+    { purchased_on: "2026-10-12", type: "convenience", total_cents: 250 },
+    { purchased_on: "2026-10-12", type: "eating_out", total_cents: 4000 },
+  ];
+  expect(
+    dailyHistory(purchases, changes, ["2026-10-11", "2026-10-12", "2026-10-13"], fallback),
+  ).toEqual([
+    { start: "2026-10-11", value: 500, limit: 2143 },
+    { start: "2026-10-12", value: 1250, limit: 1714 },
+    { start: "2026-10-13", value: 0, limit: 1714 },
   ]);
 });

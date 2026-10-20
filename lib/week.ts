@@ -41,7 +41,9 @@ export function budgetStatus(
 ): { text: string; kind: "on-track" | "watch" | "over" } {
   if (spent > budget)
     return { text: `Over by ${money(spent - budget)}`, kind: "over" };
-  if (spent * 7 <= budget * day) return { text: "On track", kind: "on-track" };
+  // Under half the budget is never a warning, even early in the week.
+  if (spent * 7 <= budget * day || spent * 2 < budget)
+    return { text: "On track", kind: "on-track" };
   return { text: "Watch", kind: "watch" };
 }
 

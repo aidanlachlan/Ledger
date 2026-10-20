@@ -25,7 +25,6 @@ export default function RootLayout({
             <span>Food, in perspective.</span>
           </header>
           <main id="main">{children}</main>
-          <footer>A clearer week, one purchase at a time.</footer>
         </div>
       </body>
     </html>

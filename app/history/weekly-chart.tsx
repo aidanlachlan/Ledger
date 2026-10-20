@@ -17,6 +17,14 @@ const shortDate = (date: string) =>
     timeZone: "UTC",
   }).format(new Date(`${date}T12:00:00Z`));
 
+const dayDate = (date: string) =>
+  new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${date}T12:00:00Z`));
+
 // A round axis maximum: 1, 2 or 5 times a power of ten, at or above `max`.
 function niceMax(max: number): number {
   if (max <= 0) return 1;
@@ -33,12 +41,14 @@ function barPath(x: number, y: number, w: number, base: number): string {
 export default function WeeklyChart({
   title,
   kind,
+  unit = "week",
   weeks,
   valueLabel,
   limitLabel,
 }: {
   title: string;
   kind: "money" | "count";
+  unit?: "week" | "day";
   weeks: ChartWeek[];
   valueLabel: string;
   limitLabel: string;
@@ -55,6 +65,8 @@ export default function WeeklyChart({
   const base = PAD.top + plotH;
   const labelEvery = Math.ceil(weeks.length / 4);
   const shown = active === null ? null : weeks[active];
+  const label = (start: string) =>
+    unit === "week" ? `Week of ${shortDate(start)}` : dayDate(start);
   return (
     <figure className="chart">
       <figcaption>
@@ -81,7 +93,7 @@ export default function WeeklyChart({
               left: `${Math.min(80, Math.max(20, ((PAD.left + slot * (active + 0.5)) / W) * 100))}%`,
             }}
           >
-            <strong>Week of {shortDate(shown.start)}</strong>
+            <strong>{label(shown.start)}</strong>
             <span>
               {valueLabel}: {fmt(shown.value)}
             </span>
@@ -127,7 +139,7 @@ export default function WeeklyChart({
                 key={week.start}
                 className={i === active ? "week active" : "week"}
                 tabIndex={0}
-                aria-label={`Week of ${shortDate(week.start)}: ${fmt(week.value)} of ${fmt(week.limit)}${over ? ", over" : ""}`}
+                aria-label={`${label(week.start)}: ${fmt(week.value)} of ${fmt(week.limit)}${over ? ", over" : ""}`}
                 onMouseEnter={() => setActive(i)}
                 onFocus={() => setActive(i)}
                 onBlur={() => setActive(null)}
@@ -155,7 +167,11 @@ export default function WeeklyChart({
                 />
                 {(i % labelEvery === 0 || i === weeks.length - 1) && (
                   <text className="axis" x={cx} y={H - 6} textAnchor="middle">
-                    {i === weeks.length - 1 ? "This wk" : shortDate(week.start)}
+                    {i === weeks.length - 1
+                      ? unit === "week"
+                        ? "This wk"
+                        : "Today"
+                      : shortDate(week.start)}
                   </text>
                 )}
               </g>
@@ -168,7 +184,7 @@ export default function WeeklyChart({
         <table>
           <thead>
             <tr>
-              <th scope="col">Week of</th>
+              <th scope="col">{unit === "week" ? "Week of" : "Day"}</th>
               <th scope="col">{valueLabel}</th>
               <th scope="col">{limitLabel}</th>
             </tr>
@@ -176,7 +192,9 @@ export default function WeeklyChart({
           <tbody>
             {[...weeks].reverse().map((week) => (
               <tr key={week.start}>
-                <th scope="row">{shortDate(week.start)}</th>
+                <th scope="row">
+                  {unit === "week" ? shortDate(week.start) : dayDate(week.start)}
+                </th>
                 <td className="amount">
                   {fmt(week.value)}
                   {week.value > week.limit && (

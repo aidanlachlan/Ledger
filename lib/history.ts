@@ -1,4 +1,4 @@
-import { addDays } from "./week";
+import { addDays, weekBounds } from "./week";
 
 export type BudgetChange = {
   effective_week: string;
@@ -63,4 +63,22 @@ export function weeklyHistory(
       ...limitsFor(start, changes, fallback),
     };
   });
+}
+
+/** Food spend per day, against that day's share of its week's budget. */
+export function dailyHistory(
+  purchases: { purchased_on: string; type: string; total_cents: number }[],
+  changes: BudgetChange[],
+  days: string[],
+  fallback: { budgetCents: number; mealsLimit: number },
+) {
+  return days.map((day) => ({
+    start: day,
+    value: purchases
+      .filter((p) => p.purchased_on === day && p.type !== "eating_out")
+      .reduce((n, p) => n + p.total_cents, 0),
+    limit: Math.round(
+      limitsFor(weekBounds(day).start, changes, fallback).budgetCents / 7,
+    ),
+  }));
 }

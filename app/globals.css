@@ -178,6 +178,13 @@ button:disabled {
   gap: 12px;
   margin: 24px 0 32px;
 }
+.view-switch {
+  flex-direction: row;
+  margin: 12px 0 20px;
+}
+.view-switch .button {
+  flex: 1;
+}
 .stack {
   display: flex;
   flex-direction: column;
@@ -269,12 +276,6 @@ legend {
   flex-direction: column;
   gap: 14px;
   margin-top: 30px;
-}
-footer {
-  padding: 40px 0 30px;
-  color: var(--muted);
-  border-top: 1px solid #303035;
-  margin-top: 42px;
 }
 :focus-visible {
   outline: 3px solid #8cb6ff;

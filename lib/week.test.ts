@@ -44,7 +44,9 @@ it("validates real calendar dates", () => {
 });
 it("defines prorated, full-budget and zero-budget boundaries", () => {
   expect(budgetStatus(100, 700, 1).kind).toBe("on-track");
-  expect(budgetStatus(101, 700, 1).kind).toBe("watch");
+  expect(budgetStatus(101, 700, 1).kind).toBe("on-track");
+  expect(budgetStatus(349, 700, 1).kind).toBe("on-track");
+  expect(budgetStatus(350, 700, 1).kind).toBe("watch");
   expect(budgetStatus(700, 700, 6).kind).toBe("watch");
   expect(budgetStatus(700, 700, 7).kind).toBe("on-track");
   expect(budgetStatus(701, 700, 7).text).toBe("Over by $0.01");

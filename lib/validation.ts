@@ -54,6 +54,7 @@ export const settingsInput = z
       .regex(/^\d{1,3}$/)
       .transform(Number)
       .pipe(z.number().int().min(0).max(100)),
+    mealsBudget: optionalMoney,
     timezone: timezoneInput,
   })
   .strict();

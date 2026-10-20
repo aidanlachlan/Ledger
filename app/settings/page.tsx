@@ -21,6 +21,7 @@ export default async function Settings() {
       <SettingsForm
         budget={decimal(context.grocery_weekly_cents)}
         meals={String(context.meals_out_weekly)}
+        mealsBudget={decimal(context.meals_out_weekly_cents)}
         timezone={context.timezone}
       />
       <section className="settings-section">

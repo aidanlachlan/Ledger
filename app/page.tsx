@@ -20,13 +20,14 @@ export default async function Home({
   const spent = week
     .filter((p) => p.type !== "eating_out")
     .reduce((n, p) => n + p.total_cents, 0);
-  const meals = week.filter((p) => p.type === "eating_out").length;
+  const mealsOut = week.filter((p) => p.type === "eating_out");
+  const meals = mealsOut.length;
+  const mealsSpent = mealsOut.reduce((n, p) => n + p.total_cents, 0);
   const budget = context.grocery_weekly_cents;
   const status = budgetStatus(spent, budget, day);
   return (
     <>
-      <p className="eyebrow">Your week, at a glance</p>
-      <h1>A little room to plan.</h1>
+      <h1>This week</h1>
       <p className="muted">
         Week of <time dateTime={start}>{start}</time>
       </p>
@@ -53,7 +54,18 @@ export default async function Home({
         <p className="amount">
           {meals} of {context.meals_out_weekly}
         </p>
+        <p className="amount muted">
+          {money(mealsSpent)}
+          {context.meals_out_weekly_cents === null
+            ? " spent"
+            : ` of ${money(context.meals_out_weekly_cents)} spent`}
+        </p>
         <p className="muted">Each eating-out purchase counts as one meal.</p>
+      </section>
+      <section className="card" aria-labelledby="total-spent">
+        <h2 id="total-spent">Total spent this week</h2>
+        <p className="amount">{money(spent + mealsSpent)}</p>
+        <p className="muted">Food budget and meals out together.</p>
       </section>
       <div className="actions">
         <Link className="button primary" href="/paste" prefetch={false}>

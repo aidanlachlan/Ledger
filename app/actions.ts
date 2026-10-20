@@ -76,6 +76,7 @@ export async function saveSettings(
   const parsed = settingsInput.safeParse({
     budget: form.get("budget"),
     meals: form.get("meals"),
+    mealsBudget: form.get("mealsBudget"),
     timezone: form.get("timezone"),
   });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
@@ -97,6 +98,7 @@ export async function saveSettings(
       .update({
         grocery_weekly_cents: parsed.data.budget,
         meals_out_weekly: parsed.data.meals,
+        meals_out_weekly_cents: parsed.data.mealsBudget,
       })
       .eq("user_id", user.id)
       .select("user_id")
