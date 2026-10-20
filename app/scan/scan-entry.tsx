@@ -47,7 +47,7 @@ export default function ScanEntry({
         </p>
       ) : (
         <>
-          {/* Opens the camera on phones; computers can't, so explain instead. */}
+          {/* Opens the camera on phones; turned off on computers, with a note. */}
           <label
             className="button primary file-pick"
             onClick={(e) => {
@@ -68,7 +68,7 @@ export default function ScanEntry({
           </label>
           {cameraNote && (
             <p className="notice" role="status">
-              Taking a photo needs your phone&rsquo;s camera. Choose a photo
+              Taking a photo is turned off on computers. Choose a photo
               instead, or open Ledger on your phone.
             </p>
           )}
