@@ -10,6 +10,33 @@
   /* Lighter blue for text and outlines; --accent is for button fills. */
   --accent-text: #8cb6ff;
   --accent-2: #ffc24b;
+  /* Golden-ratio scale (phi = 1.618, half-steps by its square root), shared
+     with aidanmcmurray.dev: spacing, type and radii are all steps on it. */
+  --phi: 1.618;
+  --sp-3: 0.236rem;
+  --sp-2: 0.382rem;
+  --sp-1: 0.618rem;
+  --sp-h: 0.786rem;
+  --sp0: 1rem;
+  --sp0h: 1.272rem;
+  --sp1: 1.618rem;
+  --sp1h: 2.058rem;
+  --sp2: 2.618rem;
+  --sp2h: 3.33rem;
+  --sp3: 4.236rem;
+  --fs-xs: 0.786rem;
+  --fs-sm: 0.886rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.128rem;
+  --fs-xl: 1.272rem;
+  --fs-2xl: 1.618rem;
+  --fs-3xl: 2.058rem;
+  --fs-4xl: 2.618rem;
+  --fs-5xl: 3.33rem;
+  --radius-xs: 0.236rem;
+  --radius: 0.382rem;
+  --radius-lg: 0.618rem;
+  --radius-xl: 1rem;
 }
 * {
   box-sizing: border-box;
@@ -19,31 +46,31 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 17px;
-  line-height: 1.55;
+  font-size: var(--fs-lg);
+  line-height: var(--phi);
 }
 .shell {
   max-width: 620px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--sp1);
 }
 .brand {
-  padding: 30px 0 36px;
+  padding: var(--sp1h) 0 var(--sp1h);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--sp-3);
   border-bottom: 1px solid #303035;
-  margin-bottom: 32px;
+  margin-bottom: var(--sp1h);
 }
 .brand a {
   color: var(--text);
-  font-size: 27px;
+  font-size: var(--fs-2xl);
   font-weight: 750;
   letter-spacing: -1px;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-1);
   align-self: flex-start;
 }
 .brand-dot {
@@ -57,27 +84,27 @@ body {
   color: var(--muted);
 }
 h1 {
-  font-size: 32px;
+  font-size: var(--fs-3xl);
   line-height: 1.2;
   letter-spacing: -1px;
   font-weight: 700;
-  margin: 12px 0 16px;
+  margin: var(--sp-h) 0 var(--sp0);
 }
 h2 {
-  font-size: 21px;
+  font-size: var(--fs-xl);
   font-weight: 650;
-  margin: 0 0 14px;
+  margin: 0 0 var(--sp-h);
   letter-spacing: -0.35px;
 }
 p {
-  margin: 0 0 18px;
+  margin: 0 0 var(--sp0);
 }
 a {
   color: var(--accent-text);
   text-underline-offset: 4px;
 }
 nav {
-  margin-bottom: 24px;
+  margin-bottom: var(--sp1);
 }
 nav a {
   display: inline-flex;
@@ -85,23 +112,23 @@ nav a {
   align-items: center;
 }
 .eyebrow {
-  font-size: 17px;
+  font-size: var(--fs-lg);
   color: var(--muted);
-  margin: 0 0 10px;
+  margin: 0 0 var(--sp-1);
 }
 .card {
   background: var(--card);
   border: 1px solid #303035;
-  border-radius: 20px;
-  padding: 25px;
-  margin: 20px 0;
+  border-radius: var(--radius-xl);
+  padding: var(--sp1);
+  margin: var(--sp0h) 0;
 }
 .hero {
-  font-size: 56px;
+  font-size: var(--fs-5xl);
   font-weight: 750;
   letter-spacing: -2.5px;
   line-height: 1.15;
-  margin: 8px 0 18px;
+  margin: var(--sp-1) 0 var(--sp0);
 }
 .amount,
 input[inputmode="decimal"],
@@ -110,7 +137,7 @@ progress {
 }
 .status {
   display: inline-block;
-  margin: 18px 0 0;
+  margin: var(--sp0) 0 0;
   font-weight: 600;
 }
 .on-track {
@@ -129,21 +156,21 @@ progress {
   height: 8px;
   appearance: none;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   background: #38383f;
-  margin-top: 20px;
+  margin-top: var(--sp0h);
 }
 progress::-webkit-progress-bar {
   background: #38383f;
 }
 progress::-webkit-progress-value {
   background: #f5f5f5;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
 }
 progress::-moz-progress-bar {
   background: #f5f5f5;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
 }
 .button,
 button {
@@ -153,8 +180,8 @@ button {
   min-height: 48px;
   width: 100%;
   border: 1px solid #45454f;
-  border-radius: 12px;
-  padding: 11px 18px;
+  border-radius: var(--radius-lg);
+  padding: var(--sp-1) var(--sp0);
   font: inherit;
   font-weight: 600;
   text-decoration: none;
@@ -178,19 +205,19 @@ button:disabled {
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin: 24px 0 32px;
+  gap: var(--sp-h);
+  margin: var(--sp1) 0 var(--sp1h);
 }
 .view-switch {
   flex-direction: row;
   align-items: center;
-  margin: 12px 0 20px;
+  margin: var(--sp-h) 0 var(--sp0h);
 }
 .search {
   display: flex;
-  gap: 12px;
+  gap: var(--sp-h);
   align-items: flex-end;
-  margin: 12px 0 8px;
+  margin: var(--sp-h) 0 var(--sp-1);
 }
 .search label {
   flex: 1;
@@ -199,7 +226,7 @@ button:disabled {
 .search button {
   width: auto;
   flex: none;
-  padding-inline: 22px;
+  padding-inline: var(--sp0h);
 }
 .view-switch .button {
   flex: 1;
@@ -207,12 +234,12 @@ button:disabled {
 .stack {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--sp0h);
 }
 label {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--sp-1);
   font-weight: 550;
 }
 input,
@@ -221,8 +248,8 @@ textarea {
   width: 100%;
   min-height: 48px;
   border: 1px solid #55555f;
-  border-radius: 10px;
-  padding: 11px 13px;
+  border-radius: var(--radius-lg);
+  padding: var(--sp-1) var(--sp-h);
   background: #111113;
   color: var(--text);
   font: inherit;
@@ -237,31 +264,31 @@ textarea {
   resize: vertical;
 }
 input.amount-first {
-  font-size: 32px;
+  font-size: var(--fs-3xl);
   font-weight: 650;
   letter-spacing: -0.6px;
 }
 fieldset {
   min-width: 0;
   border: 1px solid #45454f;
-  border-radius: 14px;
-  padding: 18px;
+  border-radius: var(--radius-xl);
+  padding: var(--sp0);
   margin: 0;
 }
 legend {
-  padding: 0 6px;
+  padding: 0 var(--sp-2);
   font-weight: 650;
 }
 .helper {
   color: var(--muted);
-  font-size: 17px;
+  font-size: var(--fs-lg);
   font-weight: 400;
 }
 .notice {
-  padding: 16px;
+  padding: var(--sp0);
   border: 1px solid #55555f;
-  border-radius: 12px;
-  margin: 18px 0;
+  border-radius: var(--radius-lg);
+  margin: var(--sp0) 0;
 }
 .error {
   border-color: #ff5a5a;
@@ -275,7 +302,7 @@ legend {
   margin: 0;
 }
 .purchase-list li {
-  padding: 18px 0;
+  padding: var(--sp0) 0;
   border-bottom: 1px solid #38383f;
 }
 .purchase-list li:last-child {
@@ -288,13 +315,13 @@ legend {
 .purchase-amount {
   display: block;
   font-weight: 650;
-  margin: 5px 0;
+  margin: var(--sp-2) 0;
 }
 .utility {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  margin-top: 30px;
+  gap: var(--sp-h);
+  margin-top: var(--sp1h);
 }
 :focus-visible {
   outline: 3px solid var(--accent-text);
@@ -305,7 +332,7 @@ legend {
   top: -100px;
   left: 16px;
   z-index: 10;
-  padding: 12px;
+  padding: var(--sp-h);
   background: var(--card);
 }
 .skip:focus {
@@ -313,13 +340,13 @@ legend {
 }
 @media (max-width: 400px) {
   .shell {
-    padding: 0 16px;
+    padding: 0 var(--sp0);
   }
   .card {
-    padding: 20px;
+    padding: var(--sp0h);
   }
   .hero {
-    font-size: 48px;
+    font-size: var(--fs-5xl);
   }
 }
 .sr-only {
@@ -333,17 +360,17 @@ legend {
 .skeleton {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--sp0h);
 }
 .skeleton .card {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--sp-h);
 }
 .skeleton-bar {
   height: 14px;
   width: 60%;
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   background: #2a2a30;
   animation: skeleton-pulse 1.4s ease-in-out infinite;
 }
@@ -382,17 +409,17 @@ a.purchase-name:hover {
 .item-row {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 4px 16px;
+  gap: var(--sp-3) var(--sp0);
 }
 .item-detail {
   grid-column: 1 / -1;
-  font-size: 15px;
+  font-size: var(--fs-sm);
 }
 .totals {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 10px 16px;
-  margin: 0 0 18px;
+  gap: var(--sp-1) var(--sp0);
+  margin: 0 0 var(--sp0);
 }
 .totals dd {
   margin: 0;
@@ -405,8 +432,8 @@ button.danger {
 .auth-switch {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 6px;
+  gap: var(--sp-1);
+  margin-top: var(--sp-2);
 }
 .auth-switch button {
   min-height: 44px;
@@ -416,7 +443,7 @@ button.danger {
   font-weight: 500;
 }
 .settings-section {
-  margin-top: 36px;
+  margin-top: var(--sp1h);
 }
 /* History charts: monochrome. Over-limit bars are told apart by lightness,
    which holds for colorblind viewers; both bars clear 3:1 on the card
@@ -427,28 +454,28 @@ button.danger {
   margin: 0;
 }
 .chart figcaption h2 {
-  margin-bottom: 8px;
+  margin-bottom: var(--sp-1);
 }
 .legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 16px;
+  gap: var(--sp-2) var(--sp0);
   list-style: none;
   padding: 0;
-  margin: 0 0 12px;
+  margin: 0 0 var(--sp-h);
   color: var(--muted);
-  font-size: 15px;
+  font-size: var(--fs-sm);
 }
 .legend li {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--sp-2);
 }
 .swatch {
   display: inline-block;
   width: 12px;
   height: 12px;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
 }
 .swatch.bar {
   background: var(--bar);
@@ -510,11 +537,11 @@ button.danger {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 8px 10px;
+  padding: var(--sp-1) var(--sp-1);
   border: 1px solid #45454f;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   background: #222227;
-  font-size: 14px;
+  font-size: var(--fs-sm);
   white-space: nowrap;
   pointer-events: none;
   z-index: 1;
@@ -524,43 +551,53 @@ button.danger {
   font-weight: 650;
 }
 .chart-table {
-  margin-top: 12px;
+  margin-top: var(--sp-h);
 }
 .chart-table summary {
   cursor: pointer;
   color: var(--accent-text);
-  font-size: 15px;
+  font-size: var(--fs-sm);
 }
 .chart-table table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
-  font-size: 15px;
+  margin-top: var(--sp-1);
+  font-size: var(--fs-sm);
 }
 .chart-table th,
 .chart-table td {
   text-align: right;
-  padding: 6px 0;
+  padding: var(--sp-2) 0;
   border-bottom: 1px solid #303035;
 }
 .chart-table th:first-child {
   text-align: left;
   font-weight: 500;
 }
+.card-footer {
+  margin: var(--sp1) 0 0;
+  padding-top: var(--sp0);
+  border-top: 1px solid #303035;
+}
 .stat-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: var(--sp0h);
+  margin: var(--sp0h) 0;
+}
+/* Grid items don't collapse margins, so the row owns the spacing. */
+.stat-row .card {
+  margin: 0;
 }
 .stat h2 {
-  font-size: 16px;
+  font-size: var(--fs-md);
 }
 .stat-value {
-  font-size: 26px;
+  font-size: var(--fs-2xl);
   font-weight: 650;
-  margin-bottom: 6px;
+  margin-bottom: var(--sp-2);
 }
 .stat .muted {
-  font-size: 14px;
+  font-size: var(--fs-sm);
   margin: 0;
 }
