@@ -88,6 +88,13 @@ export default async function History({
       </p>
       <div className="stat-row">
         <section className="card stat">
+          <h2>Within budget</h2>
+          <p className="amount stat-value">
+            {past.length ? `${within} of ${past.length}` : "—"}
+          </p>
+          <p className="muted">Full weeks, not counting this one</p>
+        </section>
+        <section className="card stat">
           <h2>Average per week</h2>
           <p className="amount stat-value">
             {average === null ? "—" : money(average)}
@@ -97,13 +104,6 @@ export default async function History({
               ? `Over the last ${past.length} full ${past.length === 1 ? "week" : "weeks"}`
               : "Shows after your first full week"}
           </p>
-        </section>
-        <section className="card stat">
-          <h2>Within budget</h2>
-          <p className="amount stat-value">
-            {past.length ? `${within} of ${past.length}` : "—"}
-          </p>
-          <p className="muted">Full weeks, not counting this one</p>
         </section>
       </div>
       <section className="card">
