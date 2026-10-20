@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import {
   budgetStatus,
+  daysInMonth,
   monthlyEquivalent,
   progressPercent,
   todayIn,
@@ -61,4 +62,12 @@ it("spreads a weekly budget over an average month", () => {
   expect(monthlyEquivalent(15000)).toBe(65000);
   expect(monthlyEquivalent(10000)).toBe(43333);
   expect(monthlyEquivalent(0)).toBe(0);
+  expect(monthlyEquivalent(15000, 31)).toBe(66429);
+  expect(monthlyEquivalent(15000, 28)).toBe(60000);
+});
+it("counts days in calendar months, including leap Februaries", () => {
+  expect(daysInMonth("2026-10-20")).toBe(31);
+  expect(daysInMonth("2026-02-01")).toBe(28);
+  expect(daysInMonth("2028-02-29")).toBe(29);
+  expect(daysInMonth("2026-04-30")).toBe(30);
 });

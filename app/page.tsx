@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getContext, getPurchases, getRecentPurchases } from "../lib/data";
 import {
   budgetStatus,
+  daysInMonth,
   monthlyEquivalent,
   progressPercent,
   weekBounds,
@@ -75,10 +76,12 @@ export default async function Home({
       <section className="card" aria-labelledby="food-month">
         <h2 id="food-month">Food this month</h2>
         <p className="amount">
-          {money(monthSpent)} of about {money(monthlyEquivalent(budget))}
+          {money(monthSpent)} of{" "}
+          {money(monthlyEquivalent(budget, daysInMonth(context.today)))}
         </p>
         <p className="muted">
-          Your weekly budget spread over an average month.
+          Your weekly budget across the {daysInMonth(context.today)} days of{" "}
+          {monthName(context.today)}.
         </p>
       </section>
       <section className="card" aria-labelledby="total-spent">
@@ -125,3 +128,8 @@ export default async function Home({
     </>
   );
 }
+
+const monthName = (date: string) =>
+  new Intl.DateTimeFormat("en-US", { month: "long", timeZone: "UTC" }).format(
+    new Date(`${date}T12:00:00Z`),
+  );
