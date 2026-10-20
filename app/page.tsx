@@ -93,7 +93,7 @@ export default async function Home({
       </section>
       <div className="utility">
         <Link className="button" href="/history" prefetch={false}>
-          Weekly history
+          History
         </Link>
         <Link className="button" href="/settings" prefetch={false}>
           Settings
