@@ -25,6 +25,8 @@ export async function setPassword(
     });
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const { supabase } = await requireUser();
+  // After a reset, the user signs in again with the new password.
+  const signInAfter = form.get("after") === "sign-in";
   try {
     const { error } = await supabase.auth.updateUser({
       password: parsed.data.password,
@@ -41,15 +43,19 @@ export async function setPassword(
     if (error)
       return { error: "Your password could not be saved. Please retry." };
     // Anyone signed in elsewhere with the old password loses access now.
-    const others = await supabase.auth.signOut({ scope: "others" });
-    return {
-      success: others.error
-        ? "Password saved. Other devices could not be signed out; sign out on them yourself."
-        : "Password saved. Other devices have been signed out.",
-    };
+    if (signInAfter) await supabase.auth.signOut({ scope: "global" });
+    else {
+      const others = await supabase.auth.signOut({ scope: "others" });
+      return {
+        success: others.error
+          ? "Password saved. Other devices could not be signed out; sign out on them yourself."
+          : "Password saved. Other devices have been signed out.",
+      };
+    }
   } catch {
     return { error: "Your password could not be saved. Please retry." };
   }
+  redirect("/sign-in?reset=done");
 }
 
 export async function signOut(form: FormData) {

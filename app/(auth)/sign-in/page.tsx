@@ -3,9 +3,9 @@ import SignInForm from "./sign-in-form";
 export default async function SignIn({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; reset?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, reset } = await searchParams;
   // Email links use the configured origin, never the request's Host.
   let origin: string | null = null;
   if (
@@ -31,6 +31,11 @@ export default async function SignIn({
           Use your password, or get a one-time link by email. Signed in with a
           link before? Set a password in Settings.
         </p>
+        {reset === "done" && (
+          <p className="notice success" role="status">
+            Password updated. Sign in with your new password.
+          </p>
+        )}
         {error && (
           <p className="notice error" role="alert">
             This link could not be used. Request a fresh link and open it in the

@@ -2,7 +2,13 @@
 import { useRef, useState, useTransition } from "react";
 import { setPassword } from "../actions";
 import type { ActionResult } from "../../lib/validation";
-export default function PasswordForm({ email }: { email: string }) {
+export default function PasswordForm({
+  email,
+  signInAfter = false,
+}: {
+  email: string;
+  signInAfter?: boolean;
+}) {
   const [state, setState] = useState<ActionResult>({});
   const [pending, startTransition] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
@@ -29,6 +35,7 @@ export default function PasswordForm({ email }: { email: string }) {
     >
       <fieldset disabled={pending} className="stack">
         <legend>Password</legend>
+        {signInAfter && <input type="hidden" name="after" value="sign-in" />}
         <p className="helper">
           Set or change the password for {email}, so you can sign in without an
           email link.
