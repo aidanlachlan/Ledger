@@ -1,7 +1,9 @@
 "use client";
 import { useState, useTransition } from "react";
 import { saveSettings } from "../actions";
-import type { ActionResult } from "../../lib/validation";
+import { money } from "../../lib/money";
+import { moneyInput, type ActionResult } from "../../lib/validation";
+import { monthlyEquivalent } from "../../lib/week";
 export default function SettingsForm({
   budget,
   meals,
@@ -31,6 +33,7 @@ export default function SettingsForm({
     });
   };
   const [values, setValues] = useState({ budget, meals, mealsBudget, timezone });
+  const weekly = moneyInput.safeParse(values.budget);
   return (
     <form onSubmit={action} className="stack">
       <label>
@@ -47,6 +50,8 @@ export default function SettingsForm({
         />
         <span className="helper">
           Includes groceries and convenience purchases.
+          {weekly.success &&
+            ` About ${money(monthlyEquivalent(weekly.data))} a month.`}
         </span>
       </label>
       <label>

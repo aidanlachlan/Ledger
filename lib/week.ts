@@ -54,3 +54,8 @@ export function progressPercent(spent: number, budget: number): number {
       : 0
     : Math.min(100, Math.max(0, (spent / budget) * 100));
 }
+
+/** A weekly amount spread over an average month (52 weeks ÷ 12). */
+export function monthlyEquivalent(weeklyCents: number): number {
+  return Math.round((weeklyCents * 52) / 12);
+}

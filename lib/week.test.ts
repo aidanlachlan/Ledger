@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import {
   budgetStatus,
+  monthlyEquivalent,
   progressPercent,
   todayIn,
   validDate,
@@ -55,4 +56,9 @@ it("defines prorated, full-budget and zero-budget boundaries", () => {
   expect(progressPercent(0, 0)).toBe(0);
   expect(progressPercent(1, 0)).toBe(100);
   expect(progressPercent(800, 700)).toBe(100);
+});
+it("spreads a weekly budget over an average month", () => {
+  expect(monthlyEquivalent(15000)).toBe(65000);
+  expect(monthlyEquivalent(10000)).toBe(43333);
+  expect(monthlyEquivalent(0)).toBe(0);
 });

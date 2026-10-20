@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { getContext, getPurchases, getRecentPurchases } from "../lib/data";
-import { budgetStatus, progressPercent, weekBounds } from "../lib/week";
+import {
+  budgetStatus,
+  monthlyEquivalent,
+  progressPercent,
+  weekBounds,
+} from "../lib/week";
 import { money } from "../lib/money";
 import { signOut } from "./actions";
 import PurchaseList from "./components/purchase-list";
@@ -12,8 +17,10 @@ export default async function Home({
 }) {
   const context = await getContext();
   const { start, end, day } = weekBounds(context.today);
-  const [week, recent, params] = await Promise.all([
+  const monthStart = `${context.today.slice(0, 8)}01`;
+  const [week, month, recent, params] = await Promise.all([
     getPurchases(start, end),
+    getPurchases(monthStart),
     getRecentPurchases(5),
     searchParams,
   ]);
@@ -24,6 +31,9 @@ export default async function Home({
   const meals = mealsOut.length;
   const mealsSpent = mealsOut.reduce((n, p) => n + p.total_cents, 0);
   const budget = context.grocery_weekly_cents;
+  const monthSpent = month
+    .filter((p) => p.type !== "eating_out")
+    .reduce((n, p) => n + p.total_cents, 0);
   const status = budgetStatus(spent, budget, day);
   return (
     <>
@@ -61,6 +71,15 @@ export default async function Home({
             : ` of ${money(context.meals_out_weekly_cents)} spent`}
         </p>
         <p className="muted">Each eating-out purchase counts as one meal.</p>
+      </section>
+      <section className="card" aria-labelledby="food-month">
+        <h2 id="food-month">Food this month</h2>
+        <p className="amount">
+          {money(monthSpent)} of about {money(monthlyEquivalent(budget))}
+        </p>
+        <p className="muted">
+          Your weekly budget spread over an average month.
+        </p>
       </section>
       <section className="card" aria-labelledby="total-spent">
         <h2 id="total-spent">Total spent this week</h2>
