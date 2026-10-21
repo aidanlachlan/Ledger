@@ -27,8 +27,8 @@ function draftFrom(receipt: ParsedReceipt, today: string): PurchaseDraft {
   };
 }
 
-// What to tell someone about a receipt read from pasted text or a photo, so a
-// bad read never looks like a good one.
+// Describes how reliable a parsed receipt is, so that an incomplete read is
+// never presented as a clean one.
 function readNotice(receipt: ParsedReceipt): { text: string; watch: boolean } {
   if (receipt.mathCheck === "ok")
     return {

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { findPaper, paperThreshold, stretchContrast } from "./scan-image";
 
-// A dark 200 × 100 table with a bright receipt from x 60–139, y 10–89.
+// Synthetic 200 × 100 photo: a dark background with a bright receipt at
+// x 60–139, y 10–89.
 function photo() {
   const width = 200,
     height = 100;

@@ -122,17 +122,17 @@ describe("receipt parser", () => {
       expect(() => parseReceipt(input)).toThrow();
   });
 });
-// West Seattle Thriftway, typed from the paper receipt. Prices for
-// multi-buys and bag fees sit on the line after the item's name.
-const thriftway = [
-  "West Seattle Thriftway #603",
+// Grocery layout that prints multi-buy and per-unit prices on the line below
+// the item name, with a tax table and a separate balance due.
+const grocer = [
+  "NEIGHBORHOOD GROCER #12",
   "Total:                         USD$ 52.38",
   "DELI GROCERY",
   "NAT ORG BRWN EGGS              $6.59  F",
   "WHITE CHEDDA                   $4.99  F",
   "You saved:   $ 0.30",
   ...Array(4).fill("You saved:   $ 0.74"),
-  ...Array(4).fill("TLMK YOGURT\n1 @  4 FOR $5.00      $1.25  F"),
+  ...Array(4).fill("YOGURT\n1 @  4 FOR $5.00      $1.25  F"),
   "FROZEN",
   "MANGOS                         $4.89  F",
   "FRUIT IMMUNITY BLEND           $7.69  F",
@@ -158,11 +158,11 @@ const thriftway = [
   "Your Savings Today",
   "Item Savings                   $7.64",
 ].join("\n");
-// The same receipt as on-device OCR read it from a photo: the eggs' price
-// and one yogurt's are unreadable, flags are misread, a label is garbled
-// and the balance due line is missing.
-const thriftwayScan = thriftway
-  .replace("Thriftway #603", "Thriftway #603\n&")
+// The same receipt as OCR output: one line price is unreadable, another is
+// garbled but recoverable from its deal line, tax flags are misread, a label
+// is garbled and the balance due line is missing.
+const grocerScan = grocer
+  .replace("GROCER #12", "GROCER #12\n&")
   .replace(
     "NAT ORG BRWN EGGS              $6.59  F",
     "“ks ORE  BRU EGGS   danas   F",
@@ -172,14 +172,14 @@ const thriftwayScan = thriftway
   .replace("2 @    $0.08 EA", "20     $0.08 EA")
   .replace("15 BALANCE DUE                 $52.38\n", "")
   .replace("Item Savings", "Str Savings");
-describe("thriftway receipts", () => {
+describe("next-line grocery receipts", () => {
   const items = [
     ["NAT ORG BRWN EGGS", 659],
     ["WHITE CHEDDA", 499],
-    ["TLMK YOGURT", 125],
-    ["TLMK YOGURT", 125],
-    ["TLMK YOGURT", 125],
-    ["TLMK YOGURT", 125],
+    ["YOGURT", 125],
+    ["YOGURT", 125],
+    ["YOGURT", 125],
+    ["YOGURT", 125],
     ["MANGOS", 489],
     ["FRUIT IMMUNITY BLEND", 769],
     ["BAG FEE PAPER", 16],
@@ -189,7 +189,7 @@ describe("thriftway receipts", () => {
     ["LOTUS ENERGY", 279],
   ];
   it("reads prices on the next line, deal lines, tax table and balance due", () => {
-    const r = parseReceipt(thriftway);
+    const r = parseReceipt(grocer);
     expect(r.items.map((i) => [i.rawName, i.lineTotalCents])).toEqual(items);
     expect(r.items[2]).toMatchObject({ quantity: 1, savingsCents: 0 });
     expect(r.items[1].savingsCents).toBe(30);
@@ -197,7 +197,7 @@ describe("thriftway receipts", () => {
     expect(r.items[10]).toMatchObject({ quantity: 2, savingsCents: 398 });
     expect(r.items[12].savingsCents).toBe(40);
     expect(r).toMatchObject({
-      storeName: "West Seattle Thriftway #603",
+      storeName: "NEIGHBORHOOD GROCER #12",
       subtotalCents: 5209,
       savingsCents: 764,
       taxCents: 29,
@@ -207,8 +207,8 @@ describe("thriftway receipts", () => {
     });
   });
   it("survives OCR noise and suggests, never fills, one unreadable price", () => {
-    const r = parseReceipt(thriftwayScan);
-    expect(r.storeName).toBe("West Seattle Thriftway #603");
+    const r = parseReceipt(grocerScan);
+    expect(r.storeName).toBe("NEIGHBORHOOD GROCER #12");
     expect(r.items.map((i) => i.lineTotalCents)).toEqual([
       null,
       ...items.slice(1).map(([, cents]) => cents),
@@ -270,6 +270,76 @@ describe("thriftway receipts", () => {
     expect(
       parseReceipt("SHOP\nFOOD $9.00\nTotal $9.00\nTax $1.00\nTotal $10.00"),
     ).toMatchObject({ subtotalCents: 900, totalCents: 1000, mathCheck: "ok" });
+  });
+});
+// Restaurant layout with a count and unit price on the item line and long
+// total labels. Payment lines are omitted.
+const driveIn = [
+  "Burger Stand - Downtown",
+  "100 Main St",
+  "Springfield, ST 00000",
+  "Duplicate Receipt #1",
+  "10/20/2026                       4:19:08 PM",
+  "Order Id: AAA9PNYLAEG9",
+  "Reg 2- #223 - To Go",
+  "Employee: Jehsiah S",
+  "2 Cheeseburger (@3.25)             $6.50",
+  "Sub Total                            $6.50",
+  "County Sales Tax                     $0.69",
+  "Total Tax                            $0.69",
+  "Order Total                          $7.19",
+  "Visa                                 $7.19",
+  "AUTHORIZED AMOUNT                    $7.19",
+  "--> Reprint #1 <--",
+  "--> Order Closed <--",
+  "Thank You!",
+].join("\n");
+describe("restaurant receipts", () => {
+  const expected = {
+    storeName: "Burger Stand - Downtown",
+    items: [
+      {
+        rawName: "Cheeseburger",
+        quantity: 2,
+        unitPriceCents: 325,
+        lineTotalCents: 650,
+      },
+    ],
+    subtotalCents: 650,
+    taxCents: 69,
+    totalCents: 719,
+    mathCheck: "ok",
+  };
+  it("reads count-and-unit items and long total labels", () => {
+    expect(parseReceipt(driveIn)).toMatchObject(expected);
+  });
+  it("survives a misread @ and OCR noise before labels", () => {
+    const scan = driveIn
+      .replace("(@3.25)", "(63.25)")
+      .replace("County Sales", "7 i bn : County Sales")
+      .replace("Order Total", "it gr Order Total");
+    expect(parseReceipt(scan)).toMatchObject(expected);
+  });
+  it("reads tax labels from any region", () => {
+    for (const label of [
+      "Tax",
+      "Sales Tax",
+      "Total Tax",
+      "State Tax",
+      "WA State Tax 6.5%",
+      "NY State Sales Tax 8.875%",
+      "City Sales Tax",
+      "Local Tax:",
+      "noise ~ County Tax",
+    ])
+      expect(
+        parseReceipt(`SHOP\nFOOD $1.00\n${label}   $0.10\nTotal $1.10`),
+      ).toMatchObject({ items: [{ rawName: "FOOD" }], taxCents: 10 });
+  });
+  it("keeps a count-and-unit line as is when the math does not fit", () => {
+    expect(
+      parseReceipt("SHOP\n2 Fries (@3.25)   $6.00").items[0],
+    ).toMatchObject({ rawName: "2 Fries (@3.25)", quantity: 1 });
   });
 });
 describe("money", () => {

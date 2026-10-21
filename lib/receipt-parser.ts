@@ -40,8 +40,8 @@ const privateLine =
   /\*+\d{4}|\d{8,}|\b(?:AID|Chip|Debit|Credit|Visa|Paid|Change|Returns)\b|\bSold\s+Items\b|(?:\+?\d{1,2}[ .-]?)?\(?\d{3}\)?[ .-]\d{3}[ .-]\d{4}/i;
 const amount = String.raw`-?(?:USD)?\$?\s?\d+\.\d{2}|\((?:USD)?\$?\s?\d+\.\d{2}\)`;
 const token = new RegExp(String.raw`(?<![\d.,])(${amount})(?![\d.%])`, "gi");
-// Tax flags printed after a price, such as F, FT or "T F". Any short marks
-// are accepted because OCR misreads them, but never "ea" or another amount.
+// Tax flags printed after a price, such as F, FT or "T F". Any short token is
+// accepted because OCR often misreads them; "ea" and amounts are excluded.
 const trailing = new RegExp(
   String.raw`(?:^|\s)(${amount})(?:\s*(?!EA\b)[^\s$.,/]{1,4}){0,2}$`,
   "i",
@@ -49,12 +49,29 @@ const trailing = new RegExp(
 const flagOnly = /\s(?:FT|TF|T\s?F|F)$/i;
 const detail =
   /^(?:Qty|Reg|Savings|You\s+saved)\b|@|\/lb|\d\.\d{2}\s*EA\b|\bFOR\s+\$/i;
-const totalLabel =
-  /^(Your Total Savings|Total Savings|Item Savings|Subtotal|Net Sales|Tax|Total|(?:\d+\s+)?Balance Due)\b\s*:?/i;
+const labels = String.raw`Your Total Savings|Total Savings|Item Savings|Sub\s*-?\s*Total|Net Sales|(?:[a-z.]+\s+){0,3}Tax|Order Total|Grand Total|Total|(?:\d+\s+)?(?:Balance|Amount) Due`;
+const totalLabel = new RegExp(String.raw`^(${labels})\b\s*:?`, "i");
+// A label immediately before a line's final amount, for labels preceded by a
+// long prefix or OCR noise ("County Sales Tax   $0.69").
+const endLabel = new RegExp(
+  String.raw`(?:^|\s)(${labels})\s*:?\s*(?=(?:${amount})(?:\s*[^\s$.,/]{1,4}){0,2}$)`,
+  "i",
+);
+function labelKind(label: string) {
+  const key = label.toLowerCase().replace(/\s+/g, " ");
+  if (key.includes("savings")) return "savings";
+  if (/^sub ?-? ?total$/.test(key)) return "subtotal";
+  if (key === "net sales") return "net";
+  if (key.endsWith("tax")) return "tax";
+  if (key.endsWith("due")) return "due";
+  return "total";
+}
+// An item line with its own count and unit price: "2 Cheeseburger (@3.25)".
+const ownNameAt = /^\d{1,3}\s+[a-z]{2}.*@/i;
 const taxHeader = /\bTAX[- ]VALUE\b/i;
 const dealOrEach = /\bFOR\s+\$|\bEA\b/i;
 
-// The line price a deal line implies: "2 @ 2 FOR $4.00" is $4.00 and
+// The line price implied by a deal line: "2 @ 2 FOR $4.00" is $4.00 and
 // "2 @ $0.08 EA" is $0.16. Used when the printed line price is unreadable.
 function dealPrice(line: string): number | null {
   const deal = line.match(
@@ -81,7 +98,7 @@ function magnitude(value: string): number {
 function item(name: string, value: string | null): ParsedItem {
   if (value && (value.startsWith("-") || value.startsWith("(")))
     throw new Error("Negative item amounts and returns are unsupported.");
-  // OCR often reads a speck of dirt at either end as a quote mark.
+  // Strip stray quote marks, which OCR produces from specks at the edges.
   const rawName = name
     .replace(/\s+/g, " ")
     .replace(/^[\s“”"'‘’`]+|[\s“”"'‘’`]+$/g, "");
@@ -94,6 +111,30 @@ function item(name: string, value: string | null): ParsedItem {
     unitPriceCents: null,
     savingsCents: 0,
   };
+}
+
+// Splits "2 Cheeseburger (@3.25)   $6.50" into a quantity of 2 at $3.25. OCR
+// can misread the @ as a digit, so the unit price is also tried without its
+// first character. The split applies only when count × unit price equals
+// the line total.
+function counted(entry: ParsedItem): ParsedItem {
+  const match = entry.rawName.match(
+    /^(\d{1,3})\s+(.*?[a-z].*?)\s*\(\s*@?\s*\$?(\d*\d\.\d{2})\s*\)$/i,
+  );
+  if (!match || entry.lineTotalCents === null) return entry;
+  const count = Number(match[1]);
+  for (const unit of [match[3], match[3].slice(1)]) {
+    if (!/^\d{1,4}\.\d{2}$/.test(unit)) continue;
+    const cents = toCents(unit);
+    if (count > 0 && count * cents === entry.lineTotalCents)
+      return {
+        ...entry,
+        rawName: match[2],
+        quantity: count,
+        unitPriceCents: cents,
+      };
+  }
+  return entry;
 }
 
 export function parseReceipt(text: string): ParsedReceipt {
@@ -126,9 +167,9 @@ export function parseReceipt(text: string): ParsedReceipt {
     value?: string;
   }[] = [];
   let seenItem = false;
-  // Once the totals start after the items, prices are not items.
+  // Set once the totals section begins; later prices are not items.
   let closed = false;
-  // A name printed alone, waiting for its price on the next line.
+  // A name printed on its own line, whose price may follow on the next.
   let pendingName: string | null = null;
   // Whether the previous line was an item or one of its details.
   let afterItem = false;
@@ -150,38 +191,40 @@ export function parseReceipt(text: string): ParsedReceipt {
       layout.push({ kind: "total", text: line });
       continue;
     }
-    // Only totals carry a currency code ("Total: USD$ 52.38"), even when OCR
-    // garbles the label.
+    // Amounts with a currency code ("Total: USD$ 52.38") are totals, even
+    // when OCR garbles the label.
     const coded = prices.findLast((price) => /USD/i.test(price[1]));
     if (coded && !totalLabel.test(line)) {
       layout.push({ kind: "total", text: line });
       totals.push(magnitude(coded[1]));
       continue;
     }
-    const label = line.match(totalLabel);
+    const label = line.match(totalLabel) ?? line.match(endLabel);
     if (label) {
       layout.push({ kind: "total", text: line });
-      const matches = [...line.slice(label[0].length).matchAll(token)];
+      const matches = [
+        ...line.slice(label.index! + label[0].length).matchAll(token),
+      ];
       if (!matches.length) continue;
       const raw = matches.at(-1)![1];
       const value = magnitude(raw);
-      const key = label[1].toLowerCase();
-      if (seenItem && !key.includes("savings")) closed = true;
-      if (!key.includes("savings") && /^[-(]/.test(raw))
+      const key = labelKind(label[1]);
+      if (seenItem && key !== "savings") closed = true;
+      if (key !== "savings" && /^[-(]/.test(raw))
         throw new Error("Negative totals are unsupported.");
-      if (key.includes("savings")) explicitSavings = value;
+      if (key === "savings") explicitSavings = value;
       else if (key === "subtotal") explicitSubtotal = value;
-      else if (key === "net sales") net = value;
+      else if (key === "net") net = value;
       else if (key === "tax") result.taxCents = value;
-      else if (key.endsWith("balance due")) balanceDue = value;
+      else if (key === "due") balanceDue = value;
       else totals.push(value);
       continue;
     }
-    if (detail.test(line)) {
+    if (detail.test(line) && !ownNameAt.test(line)) {
       layout.push({ kind: "detail", text: line });
       const own = line.match(trailing);
-      // "TLMK YOGURT" then "1 @ 4 FOR $5.00   $1.25 F". A deal or unit
-      // price alone ("4 FOR $5.00") is not the line's price.
+      // A name followed by "1 @ 4 FOR $5.00   $1.25 F". A deal or unit price
+      // on its own ("4 FOR $5.00") is not the line price.
       const read =
         own && (prices.length > 1 || !dealOrEach.test(line)) ? own[1] : null;
       const implied = read === null ? dealPrice(line) : null;
@@ -215,8 +258,8 @@ export function parseReceipt(text: string): ParsedReceipt {
       }
       const previous = result.items.at(-1);
       if (/^You\s+saved\b/i.test(line)) {
-        // Thriftway can print several in a row; only the first belongs to
-        // the item above it.
+        // Some receipts print several in a row; only the first belongs to
+        // the preceding item. The rest count toward total savings.
         const price = prices.at(-1);
         if (!price) continue;
         if (previous && follows && previous.savingsCents === 0) {
@@ -254,7 +297,7 @@ export function parseReceipt(text: string): ParsedReceipt {
     if (price) {
       const itemName = line.slice(0, price.index).trim();
       if (itemName && !closed) {
-        result.items.push(item(itemName, price[1]));
+        result.items.push(counted(item(itemName, price[1])));
         seenItem = true;
         afterItem = true;
       } else layout.push({ kind: "price", text: line, value: price[1] });
@@ -264,7 +307,7 @@ export function parseReceipt(text: string): ParsedReceipt {
       flagOnly.test(line) &&
       /[a-z]{3}/i.test(line)
     ) {
-      // An item line whose price could not be read, e.g. "EGGS ?.?? F".
+      // An item line whose price is unreadable, such as "EGGS ?.?? F".
       result.items.push(item(line.replace(flagOnly, ""), null));
       afterItem = true;
     } else {
@@ -292,8 +335,8 @@ export function parseReceipt(text: string): ParsedReceipt {
     throw new Error("Receipts may contain at most 200 items.");
   if (result.storeName && result.storeName.length > 120)
     throw new Error("Store names must be at most 120 characters.");
-  // A receipt can print its total twice, before and after tax ("TOTAL
-  // $52.09", then "BALANCE DUE $52.38"). The amount paid is the larger one.
+  // Some receipts print a total both before and after tax ("TOTAL $52.09",
+  // then "BALANCE DUE $52.38"). The amount paid is the larger one.
   if (balanceDue !== null) totals.push(balanceDue);
   if (totals.length) {
     const paid = Math.max(...totals);

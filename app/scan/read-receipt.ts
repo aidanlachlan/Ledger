@@ -1,9 +1,9 @@
 import { findPaper, stretchContrast } from "../../lib/scan-image";
 
-// OCR reads receipt print best at about this width in pixels.
+// Width in pixels at which receipt text is passed to OCR.
 const TEXT_WIDTH = 1200;
 const MAX_HEIGHT = 8000;
-// Finding the paper does not need full resolution.
+// Longest side of the downscaled copy used to locate the receipt.
 const PROBE_SIZE = 1600;
 
 export type ReadProgress = { step: "loading" | "reading"; percent: number };
@@ -15,6 +15,15 @@ function context(width: number, height: number) {
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   if (!ctx) throw new Error("This browser cannot read photos.");
   return { canvas, ctx };
+}
+// Per-pixel whiteness: the lowest of the three color channels. Receipt paper
+// is neutral while most backgrounds, including light wood, are tinted, so
+// this separates them better than brightness does.
+function whiteness(data: Uint8ClampedArray): Uint8Array {
+  const white = new Uint8Array(data.length / 4);
+  for (let i = 0; i < white.length; i++)
+    white[i] = Math.min(data[i * 4], data[i * 4 + 1], data[i * 4 + 2]);
+  return white;
 }
 function grayscale(data: Uint8ClampedArray): Uint8Array {
   const gray = new Uint8Array(data.length / 4);
@@ -40,7 +49,7 @@ async function prepare(file: Blob): Promise<HTMLCanvasElement> {
     );
     probe.ctx.drawImage(bitmap, 0, 0, probe.canvas.width, probe.canvas.height);
     const paper = findPaper(
-      grayscale(
+      whiteness(
         probe.ctx.getImageData(0, 0, probe.canvas.width, probe.canvas.height)
           .data,
       ),
@@ -88,8 +97,8 @@ async function prepare(file: Blob): Promise<HTMLCanvasElement> {
   }
 }
 
-// Reads a receipt photo into text on this device. The photo and its text
-// never leave the browser; the OCR engine loads from Ledger's own /ocr files.
+// Converts a receipt photo to text on the device. Neither the photo nor the
+// text leaves the browser, and the OCR engine is loaded from /ocr.
 export async function readReceipt(
   file: Blob,
   onProgress: (progress: ReadProgress) => void,
@@ -109,7 +118,8 @@ export async function readReceipt(
   });
   try {
     await worker.setParameters({
-      // Read the receipt as one block so each printed row stays one line.
+      // Treat the receipt as a single block so that each printed row stays
+      // on one line.
       tessedit_pageseg_mode: PSM.SINGLE_BLOCK,
       preserve_interword_spaces: "1",
     });
